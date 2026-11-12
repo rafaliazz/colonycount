@@ -4,6 +4,8 @@ Open-source, offline bacterial colony counter for agar plate photos: Python pack
 
 Status: pre-alpha.
 
+Datasets, licenses and attribution: see [DATA.md](DATA.md).
+
 ## Development
 
 Requires [uv](https://docs.astral.sh/uv/).
