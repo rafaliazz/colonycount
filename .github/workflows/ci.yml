@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -12,6 +13,22 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv run --locked ruff check
       - run: uv run --locked ruff format --check
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv build
+      - name: Install wheel into a clean venv and import it
+        run: |
+          uv venv /tmp/v
+          uv pip install --python /tmp/v dist/*.whl
+          cd /tmp && /tmp/v/bin/python -c "import colonycount; print(colonycount.__version__)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
   test:
     strategy:
