@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 
 import colonycount
-from colonycount.analysis import cfu
 from colonycount.detection.pipeline import DEFAULT_THRESHOLD, count
 from colonycount.models import registry
+from colonycount.utils import cfu
 
 COLUMNS = [
     "file",
