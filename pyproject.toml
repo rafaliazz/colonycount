@@ -22,11 +22,20 @@ colonycount = "colonycount.cli:main"
 [project.optional-dependencies]
 napari = ["napari", "magicgui"]
 demo = ["gradio"]
-train = ["torch", "torchvision"]
+train = ["rfdetr[train]==1.12.1", "torch", "torchvision"]
 
 [dependency-groups]
 dev = ["onnx", "pre-commit", "pytest", "ruff"]
 prepare = ["openpyxl"]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform != 'darwin'" }]
+torchvision = [{ index = "pytorch-cu130", marker = "sys_platform != 'darwin'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
 
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
