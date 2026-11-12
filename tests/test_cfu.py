@@ -20,11 +20,11 @@ def test_invalid_parameters(dilution, volume):
 def test_too_many_colonies():
     assert range_flag(420) == "TNTC"  # the CSV row keeps count 420 next to it (test_cli)
     assert range_flag(29) == "TFTC"
-    assert range_flag(30) == range_flag(300) == ""
+    assert range_flag(30) == range_flag(300) == "OK"
 
 
 def test_custom_range():
     assert range_flag(270, 25, 250) == "TNTC"
-    assert range_flag(27, 25, 250) == ""
+    assert range_flag(27, 25, 250) == "OK"
     with pytest.raises(ValueError):
         range_flag(100, 300, 30)

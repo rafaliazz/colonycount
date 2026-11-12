@@ -35,7 +35,7 @@ colonycount --list-models
 ```
 
 `counts.csv` has one row per image: `file, count, plate_found, range_flag, threshold, model, model_version, package_version, cfu_per_ml, error`.
-`range_flag` is `TFTC` below 30 colonies and `TNTC` above 300 (change with `--range LOW HIGH`); the raw count is always reported.
+`range_flag` is `TFTC` below 30 colonies and `TNTC` above 300, `OK` in between (change with `--range LOW HIGH`); the raw count is always reported.
 A failed image gets an `error` and the command exits non-zero; the other images are still counted.
 Weights download once on first use, are checked against a pinned SHA-256 and cached; after that counting works offline, and images never leave your machine.
 

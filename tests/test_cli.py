@@ -35,7 +35,7 @@ def test_folder_of_plates(plates, tmp_path):
     rows = read(out)
     assert sorted(rows) == ["plate0.jpg", "plate1.jpg", "plate2.jpg"]
     for r in rows.values():
-        assert r["count"] == "40" and r["plate_found"] == "True" and r["range_flag"] == ""
+        assert r["count"] == "40" and r["plate_found"] == "True" and r["range_flag"] == "OK"
         assert float(r["cfu_per_ml"]) == pytest.approx(40 / 1e-5)
         assert (r["model"], r["model_version"]) == ("public", "local")
         assert r["threshold"] == "0.5" and r["package_version"] == colonycount.__version__

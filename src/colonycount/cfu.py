@@ -15,4 +15,4 @@ def range_flag(count: int, low: int = COUNTABLE_RANGE[0], high: int = COUNTABLE_
     """'TFTC' below `low`, 'TNTC' above `high`, '' inside the countable range."""
     if low > high:
         raise ValueError(f"countable range low ({low}) is above high ({high})")
-    return "TFTC" if count < low else "TNTC" if count > high else ""
+    return "TFTC" if count < low else "TNTC" if count > high else "OK"
