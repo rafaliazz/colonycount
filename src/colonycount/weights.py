@@ -30,7 +30,7 @@ MODELS = {
             name="public",
             version="0.1.0",
             license="CC-BY-4.0",
-            url="https://huggingface.co/rafaliazz/colonycount-public/resolve/v0.1.0/public.onnx",
+            url="https://huggingface.co/rafali-azz/colonycount-public/resolve/v0.1.0/public.onnx",
             sha256=None,
         ),
     ]
