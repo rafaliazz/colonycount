@@ -16,13 +16,16 @@ dependencies = [
     "platformdirs",
 ]
 
+[project.scripts]
+colonycount = "colonycount.cli:main"
+
 [project.optional-dependencies]
 napari = ["napari", "magicgui"]
 demo = ["gradio"]
 train = ["torch", "torchvision"]
 
 [dependency-groups]
-dev = ["pre-commit", "pytest", "ruff"]
+dev = ["onnx", "pre-commit", "pytest", "ruff"]
 prepare = ["openpyxl"]
 
 [build-system]
