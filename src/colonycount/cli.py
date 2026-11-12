@@ -8,8 +8,9 @@ import sys
 from pathlib import Path
 
 import colonycount
-from colonycount import cfu, weights
-from colonycount.detect import DEFAULT_THRESHOLD, count
+from colonycount.analysis import cfu
+from colonycount.detection.pipeline import DEFAULT_THRESHOLD, count
+from colonycount.models import registry
 
 COLUMNS = [
     "file",
@@ -33,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD)
     p.add_argument("--model", default="public", help="built-in model name (see --list-models)")
     p.add_argument(
-        "--model-path", help=f"local ONNX file instead of a built-in model ({weights.ENV_VAR})"
+        "--model-path", help=f"local ONNX file instead of a built-in model ({registry.ENV_VAR})"
     )
     p.add_argument(
         "--range",
@@ -51,14 +52,14 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.list_models:
-        for m in weights.MODELS.values():
+        for m in registry.MODELS.values():
             print(f"{m.name}\t{m.version}\t{m.license}")
         return 0
     if not args.images:
         p.error("no images given")
     want_cfu = args.dilution is not None or args.volume is not None
     try:
-        weights.get(args.model)
+        registry.get(args.model)
         cfu.range_flag(0, *args.range)
         if want_cfu:
             cfu.cfu_per_ml(0, args.dilution, args.volume)

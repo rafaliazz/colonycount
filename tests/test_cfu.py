@@ -2,7 +2,7 @@
 
 import pytest
 
-from colonycount.cfu import cfu_per_ml, range_flag
+from colonycount.analysis.cfu import cfu_per_ml, range_flag
 
 
 def test_standard_calculation():

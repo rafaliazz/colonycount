@@ -11,7 +11,7 @@ BOX = 4.0  # half side of every box the placeholder emits
 
 
 def build_placeholder_model(path):
-    """Bright-spot detector following the detect.py contract.
+    """Bright-spot detector following the detection/runner.py contract.
 
     A pixel is a colony centre if it is the max of its 7x7 neighbourhood and brighter than 0.5
     (channel mean); its score is that brightness. At most MAX_PER_PASS boxes per pass (top-k).

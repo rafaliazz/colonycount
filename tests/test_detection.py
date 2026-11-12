@@ -1,4 +1,4 @@
-"""colony-detection spec scenarios (model registry and offline ones are in test_weights.py)."""
+"""colony-detection spec scenarios (model registry and offline ones are in test_registry.py)."""
 
 import cv2
 import numpy as np
@@ -6,7 +6,8 @@ import pytest
 from conftest import MAX_PER_PASS, make_plate
 
 import colonycount
-from colonycount.detect import _detect_tiled, _session
+from colonycount.detection.runner import load_session
+from colonycount.detection.tiling import detect_tiled
 
 
 def write(path, img):
@@ -51,7 +52,7 @@ def test_unsupported_input(tmp_path, local_model):
 
 def test_label_outside_plate(local_model):
     img, truth = make_plate(labels=True)
-    raw, _ = _detect_tiled(_session(str(local_model)), img, 640, 64)
+    raw, _ = detect_tiled(load_session(str(local_model)), img, 640, 64)
     centres = (raw[:, :2] + raw[:, 2:]) / 2
     assert (np.hypot(*(centres - 256).T) > 200).any()  # the model does fire on the labels
     r = colonycount.count(img)

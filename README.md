@@ -10,7 +10,7 @@ Datasets, licenses and attribution: see [DATA.md](DATA.md).
 
 > The built-in `public` model weights are **not published yet** (planned for v0.1), and the package is not on PyPI yet.
 > Until then, install from source and point colonycount at a local ONNX detector with `COLONYCOUNT_MODEL_PATH` (or `model_path=` / `--model-path`).
-> The model's input/output contract is documented in `src/colonycount/detect.py`.
+> The model's input/output contract is documented in `src/colonycount/detection/runner.py`.
 
 Install (once released):
 
