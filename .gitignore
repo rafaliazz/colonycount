@@ -6,3 +6,7 @@ data/
 runs/
 *.onnx
 *.pt
+*.py[cod]
+build/
+.pytest_cache/
+.ruff_cache/
