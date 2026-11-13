@@ -5,11 +5,15 @@ Commit: 6ddff4824372906469a7fae2dc3206c7aa4bbaee (2025-06-08)
 Copyright (c) Megvii Inc. and its affiliates. Licensed under the Apache License 2.0 (LICENSE).
 
 Files: yolox/models/{yolox,yolo_head,yolo_pafpn,darknet,network_blocks,losses}.py and
-yolox/utils/{boxes,ema}.py, flattened into this directory.
+yolox/utils/{boxes,ema}.py, flattened into this directory; augment_hsv and _mirror from
+yolox/data/data_augment.py (in data_augment.py).
 
 Changes (Apache-2.0 section 4(b)):
 - yolo_head.py: imports from .boxes instead of yolox.utils; stdlib logging instead of loguru;
   meshgrid is torch.meshgrid(indexing="ij") (what yolox.utils.compat does on torch >= 1.10);
   visualize_assign_result removed (needs yolox.utils.visualize).
 - yolox.py: visualize() removed (it calls visualize_assign_result).
-- __init__.py added. No other code changes.
+- data_augment.py: only augment_hsv and _mirror kept (the rest of the module, and its
+  yolox.utils import, dropped); functions unchanged.
+- __init__.py added (model names load lazily, so data_augment imports without torch).
+  No other code changes.

@@ -17,7 +17,15 @@ x COLONYCOUNT_TRAIN_GRAD_ACCUM (16) reached by accumulating max(round(nbs / batc
 --batch tiles (default COLONYCOUNT_TRAIN_BATCH_SIZE). Recipe stays YOLOX's own: SGD (momentum 0.9,
 nesterov, wd 5e-4 on conv weights), lr 0.01 / 64 per image of the effective batch, quadratic warmup
 then cosine to 5%, EMA of the weights (validated and saved as "ema"), AMP on CUDA.
-ponytail: augmentation is flips only, no mosaic/mixup/HSV; add YOLOX's if the baseline lags.
+
+Augmentation is YOLOX's default too (yolox/exp/yolox_base.py): TrainTransform's augment_hsv
+(hsv_prob 1.0, gains h 5 / s 30 / v 30) then a horizontal flip (flip_prob 0.5), vendored from
+yolox/data/data_augment.py and applied, as YOLOX does, to the cv2-loaded BGR uint8 tile (the ONNX
+export feeds the model BGR x 255 too). Mosaic/mixup/affine are YOLOX's first-phase extras, off for
+the last no_aug_epochs (15) epochs, which is the whole of a <= 15-epoch run; that no-aug phase
+also adds YOLOX's L1 box loss (trainer.before_epoch: head.use_l1). Longer runs are refused (see
+mosaic_epochs). TrainTransform's max_labels=120 cap is not copied: it drops ground truth on dense
+tiles and is a data-loading limit, not augmentation.
 
 Writes <data-dir>/runs/yolox_<size>/<timestamp>/: results.csv (train losses, val
 metrics/mAP50(B) and metrics/mAP50-95(B) per epoch, as Ultralytics names them), weights/last.pth
@@ -51,6 +59,9 @@ LR_PER_IMG = 0.01 / 64  # YOLOX basic_lr_per_img
 WARMUP_EPOCHS = 1  # YOLOX: 5 of 300; one epoch here, of 12
 MIN_LR_RATIO = 0.05
 EMA_DECAY = 0.9998
+FLIP_PROB, HSV_PROB = 0.5, 1.0  # YOLOX Exp flip_prob, hsv_prob
+HSV_GAINS = (5, 30, 30)  # augment_hsv's default hgain, sgain, vgain (TrainTransform uses those)
+NO_AUG_EPOCHS = 15  # YOLOX Exp no_aug_epochs: last epochs without mosaic/mixup, with L1 loss
 PATIENCE = 5
 EVAL_CONF, EVAL_NMS, MAX_DET = 0.001, 0.65, 300  # YOLOX eval settings; max_det as YOLOv8's
 COLUMNS = [
@@ -93,6 +104,19 @@ def lr_at(step: int, total: int, warmup: int, lr: float) -> float:
     return lr * (MIN_LR_RATIO + (1 - MIN_LR_RATIO) * 0.5 * (1 + math.cos(math.pi * t)))
 
 
+def mosaic_epochs(epochs: int, no_aug_epochs: int = NO_AUG_EPOCHS) -> int:
+    """Epochs YOLOX would train with mosaic/mixup before its no-aug phase; 0 is all we support."""
+    n = max(epochs - no_aug_epochs, 0)
+    # ponytail: only YOLOX's no-aug phase is implemented, so runs > 15 epochs are refused; for
+    # them vendor MosaicDetection (mosaic, mixup, random_affine) for the first n epochs.
+    if n:
+        raise ValueError(
+            f"{epochs} epochs: YOLOX's default recipe would use mosaic/mixup for the first {n} "
+            f"(no_aug_epochs {no_aug_epochs}); that phase isn't implemented, use <= {no_aug_epochs}"
+        )
+    return n
+
+
 def should_stop(maps: list[float], patience: int = PATIENCE) -> bool:
     """True after `patience` epochs without a better val mAP@0.5:0.95 than the best before."""
     best = maps.index(max(maps))
@@ -116,6 +140,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
         if args.epochs is None:
             args.epochs = env_int("COLONYCOUNT_TRAIN_EPOCHS", 20, lo=1)
+        mosaic_epochs(args.epochs)
         if args.batch is None:
             args.batch = env_int("COLONYCOUNT_TRAIN_BATCH_SIZE", 2, lo=1)
     except ValueError as e:
@@ -151,6 +176,14 @@ def comparable(config: dict, amp: bool) -> dict:
     """The settings that must match RF-DETR's and YOLOv8's runs."""
     keys = ("epochs", "imgsz", "seed", "patience", "nbs", "batch", "accumulate")
     c = {k: config[k] for k in keys} | {"optimizer": "SGD", "amp": amp, "ema": EMA_DECAY}
+    c["recipe"] = dict(
+        flip_prob=FLIP_PROB,
+        hsv_prob=HSV_PROB,
+        hsv_gains=list(HSV_GAINS),
+        mosaic_epochs=mosaic_epochs(config["epochs"]),
+        no_aug_epochs=NO_AUG_EPOCHS,
+        l1_loss=True,
+    )
     print("comparable config:", json.dumps(c))
     if config["batch"] > config["nbs"]:
         print(f"WARNING: per-step batch {config['batch']} > nbs {config['nbs']}: no accumulation")
@@ -158,10 +191,11 @@ def comparable(config: dict, amp: bool) -> dict:
 
 
 class Tiles:
-    """Map-style dataset: BGR 0..255 float32 [3, T, T] (YOLOX's input), labels [N, 5]."""
+    """Map-style dataset: BGR 0..255 float32 [3, T, T] (YOLOX's input), labels [N, 5].
+    augment: YOLOX's TrainTransform augmentation (HSV, then horizontal flip)."""
 
-    def __init__(self, items, tile: int, flip: bool):
-        self.items, self.tile, self.flip = items, tile, flip
+    def __init__(self, items, tile: int, augment: bool):
+        self.items, self.tile, self.augment = items, tile, augment
 
     def __len__(self):
         return len(self.items)
@@ -170,12 +204,16 @@ class Tiles:
         import cv2
 
         path, image_id, labels = self.items[i]
-        img, labels = cv2.imread(str(path)), labels.copy()
+        img, labels = cv2.imread(str(path)), labels.copy()  # BGR uint8, as YOLOX reads it
         h, w = img.shape[:2]
-        if self.flip and random.random() < 0.5:  # DataLoader seeds `random` per worker
-            img, labels[:, 1] = img[:, ::-1], w - labels[:, 1]
-        if self.flip and random.random() < 0.5:
-            img, labels[:, 2] = img[::-1], h - labels[:, 2]
+        if self.augment:  # DataLoader seeds `random` and numpy per worker
+            from third_party.yolox.data_augment import _mirror, augment_hsv
+
+            if random.random() < HSV_PROB:
+                augment_hsv(img, *HSV_GAINS)
+            c, half = labels[:, 1:3], labels[:, 3:5] / 2
+            img, xyxy = _mirror(img, np.hstack([c - half, c + half]), FLIP_PROB)
+            labels[:, 1:3] = (xyxy[:, :2] + xyxy[:, 2:]) / 2
         out = np.zeros((3, self.tile, self.tile), np.float32)
         out[:, :h, :w] = img.transpose(2, 0, 1)
         return out, labels, image_id
@@ -277,6 +315,7 @@ def train(config: dict, args: argparse.Namespace, ckpt: dict | None) -> dict:
 
     seed = config["seed"]
     random.seed(seed)
+    np.random.seed(seed)  # augment_hsv (workers=0; DataLoader workers reseed numpy themselves)
     torch.manual_seed(seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
@@ -300,14 +339,14 @@ def train(config: dict, args: argparse.Namespace, ckpt: dict | None) -> dict:
     )
     gen = torch.Generator().manual_seed(seed)
     train_loader = torch.utils.data.DataLoader(
-        Tiles(train_items, config["imgsz"], flip=True),
+        Tiles(train_items, config["imgsz"], augment=True),
         shuffle=True,
         drop_last=False,
         generator=gen,
         **loader_args,
     )
     val_loader = torch.utils.data.DataLoader(
-        Tiles(val_items, config["imgsz"], flip=False), **loader_args
+        Tiles(val_items, config["imgsz"], augment=False), **loader_args
     )
 
     model = build_model(config["size"])
@@ -316,6 +355,7 @@ def train(config: dict, args: argparse.Namespace, ckpt: dict | None) -> dict:
         print(f"COCO weights loaded; new: {skipped}")
     else:
         model.load_state_dict(ckpt["model"])
+    model.head.use_l1 = True  # YOLOX adds L1 in its no-aug phase, which is the whole run here
     model.to(device)
     ema = ModelEMA(model, EMA_DECAY)
 
@@ -342,8 +382,9 @@ def train(config: dict, args: argparse.Namespace, ckpt: dict | None) -> dict:
         opt.load_state_dict(ckpt["optimizer"])
         scaler.load_state_dict(ckpt["scaler"])
         start, maps, step = ckpt["epoch"] + 1, ckpt["maps"], ckpt["step"]
-        gen.manual_seed(seed + start)  # not epoch 1's tile order and flips again
+        gen.manual_seed(seed + start)  # not epoch 1's tile order and augmentation again
         random.seed(seed + start)
+        np.random.seed(seed + start)
     results = out / "results.csv"
     if not results.exists():
         results.write_text(",".join(COLUMNS) + "\n")
