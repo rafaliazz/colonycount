@@ -121,9 +121,10 @@ def main() -> None:
     import torch  # train extra + baseline group only; CI tests the config without them
     from ultralytics import YOLO
 
-    torch.cuda.reset_peak_memory_stats()
     t0 = time.time()
     model = YOLO(str(args.resume) if args.resume else f"yolov8{args.size}.pt")
+    # peak VRAM of training + val, not of AutoBatch's probing during setup
+    model.add_callback("on_train_start", lambda _: torch.cuda.reset_peak_memory_stats())
     model.train(**config)
     out = Path(model.trainer.save_dir)
     summary = {
