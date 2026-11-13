@@ -87,10 +87,12 @@ def summarize(plates: list[dict], t: float) -> dict:
     }
 
 
-def report(plates: list[dict], split: str, no_plate: bool, model: Path) -> dict:
-    curve = {str(t): summarize(plates, t) for t in THRESHOLDS}
+def report(
+    plates: list[dict], split: str, no_plate: bool, model: str, thresholds=THRESHOLDS
+) -> dict:
+    curve = {str(t): summarize(plates, t) for t in thresholds}
     best = min(
-        THRESHOLDS,
+        thresholds,
         key=lambda t: (curve[str(t)]["mdape_30_300"] or float("inf"), curve[str(t)]["mae"]),
     )
     sources = sorted({p["source"] for p in plates})
@@ -106,7 +108,7 @@ def report(plates: list[dict], split: str, no_plate: bool, model: Path) -> dict:
         for s in [*sources, "all"]
     }
     return {
-        "model": model.name,
+        "model": model,
         "split": split,
         "plate_restriction": not no_plate,
         "match_radius": "0.5 x mean GT box side, around the GT box centre",
@@ -159,7 +161,8 @@ def markdown(rep: dict, seconds: list[float]) -> str:
     ]
     for s, b in rep["by_density"].items():
         out += [*table(b, f"{s} by GT count"), ""]
-    out += [*table(rep["threshold_curve"], "threshold (all)"), ""]
+    if rep["threshold_curve"]:
+        out += [*table(rep["threshold_curve"], "threshold (all)"), ""]
     out += [
         f"plate not found: {len(rep['plate_not_found'])} of {len(rep['plates'])} plates; "
         f"GT colonies outside the found plate circle: {rep['gt_outside_plate']}",
@@ -169,20 +172,25 @@ def markdown(rep: dict, seconds: list[float]) -> str:
     return "\n".join(out) + "\n"
 
 
-def run(
-    model: Path, split: str, data_dir: Path, no_plate: bool, limit: int | None = None
-) -> tuple[list[dict], list[float]]:
+def ground_truth(data_dir: Path, split: str):
+    """Yield (COCO image record, its GT boxes as an Nx4 xywh array), sorted by file name."""
     coco = json.loads((data_dir / "public" / "annotations" / f"{split}.json").read_text())
     anns: dict[int, list] = {i["id"]: [] for i in coco["images"]}
     for a in coco["annotations"]:
         anns[a["image_id"]].append(a["bbox"])
+    for im in sorted(coco["images"], key=lambda i: i["file_name"]):
+        yield im, np.asarray(anns[im["id"]], float).reshape(-1, 4)
+
+
+def run(
+    model: Path, split: str, data_dir: Path, no_plate: bool, limit: int | None = None
+) -> tuple[list[dict], list[float]]:
     plates, seconds = [], []
-    images = sorted(coco["images"], key=lambda i: i["file_name"])
+    items = list(ground_truth(data_dir, split))
     if limit:  # smoke runs: evenly spaced plates
-        images = images[:: max(1, len(images) // limit)][:limit]
-    for im in images:
+        items = items[:: max(1, len(items) // limit)][:limit]
+    for im, boxes in items:
         img = load_image(data_dir / im["file_name"])
-        boxes = np.asarray(anns[im["id"]], float).reshape(-1, 4)
         gt_xy = boxes[:, :2] + boxes[:, 2:] / 2
         circle = None if no_plate else find_plate(img)
         outside = 0
@@ -233,7 +241,7 @@ def main() -> None:
     args.out = args.out or args.data_dir / "bench"
 
     plates, seconds = run(args.model, args.split, args.data_dir, args.no_plate, args.limit)
-    rep = report(plates, args.split, args.no_plate, args.model)
+    rep = report(plates, args.split, args.no_plate, args.model.name)
     args.out.mkdir(parents=True, exist_ok=True)
     stem = args.out / (args.split + ("-noplate" if args.no_plate else ""))
     stem.with_suffix(".json").write_text(json.dumps(rep, indent=1) + "\n")
