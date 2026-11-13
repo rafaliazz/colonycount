@@ -1,6 +1,7 @@
 """Count-accuracy benchmark: colonycount's real pipeline on whole plates of a COCO split (task 2.3).
 
 Usage: uv run python bench/evaluate.py --model FILE.onnx [--split val] [--no-plate] [--out DIR]
+       [--limit N]
 
 Runs ``colonycount.count`` (plate finding, tiling, seam-aware NMS, threshold) once per plate at the
 lowest swept threshold; higher thresholds keep the detections scoring at or above them. That is
@@ -181,9 +182,14 @@ def ground_truth(data_dir: Path, split: str):
         yield im, np.asarray(anns[im["id"]], float).reshape(-1, 4)
 
 
-def run(model: Path, split: str, data_dir: Path, no_plate: bool) -> tuple[list[dict], list[float]]:
+def run(
+    model: Path, split: str, data_dir: Path, no_plate: bool, limit: int | None = None
+) -> tuple[list[dict], list[float]]:
     plates, seconds = [], []
-    for im, boxes in ground_truth(data_dir, split):
+    items = list(ground_truth(data_dir, split))
+    if limit:  # smoke runs: evenly spaced plates
+        items = items[:: max(1, len(items) // limit)][:limit]
+    for im, boxes in items:
         img = load_image(data_dir / im["file_name"])
         gt_xy = boxes[:, :2] + boxes[:, 2:] / 2
         circle = None if no_plate else find_plate(img)
@@ -227,13 +233,14 @@ def main() -> None:
     ap.add_argument("--no-plate", action="store_true", help="count the whole image, no plate crop")
     ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
     ap.add_argument("--out", type=Path, help="default: <data dir>/bench")
+    ap.add_argument("--limit", type=int, help="only N evenly spaced plates (smoke runs)")
     args = ap.parse_args()
     if args.split == "test" and not args.allow_test:
         ap.error("the test split is reserved for the final model choice; pass --allow-test")
     args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
     args.out = args.out or args.data_dir / "bench"
 
-    plates, seconds = run(args.model, args.split, args.data_dir, args.no_plate)
+    plates, seconds = run(args.model, args.split, args.data_dir, args.no_plate, args.limit)
     rep = report(plates, args.split, args.no_plate, args.model.name)
     args.out.mkdir(parents=True, exist_ok=True)
     stem = args.out / (args.split + ("-noplate" if args.no_plate else ""))
