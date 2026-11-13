@@ -1,11 +1,12 @@
-"""Cut the public COCO splits into TILE_SIZE tiles at native resolution for detector training.
+"""Cut the public COCO splits into square tiles at native resolution for detector training.
 
 Usage: uv run --extra train python train/make_tiles.py [--data-dir DIR] [--empty-frac 0.05]
 
 Reads <data-dir>/public/annotations/{train,val}.json and writes the layout rfdetr expects:
-<data-dir>/public/tiles_<T>/{train,valid}/ with tile jpgs + _annotations.coco.json. Tiles use the
-same grid as inference (detection/tiling.py). A box is kept in a tile, clipped to it, if at least
-half its area lies inside. Tiles without boxes are kept with probability --empty-frac (seeded).
+<data-dir>/public/tiles_<T>/{train,valid}/ with tile jpgs + _annotations.coco.json, T =
+COLONYCOUNT_TRAIN_TILE_SIZE. Tiles use the same grid as inference (detection/tiling.py). A box is
+kept in a tile, clipped to it, if at least COLONYCOUNT_TILE_MIN_INSIDE of its area lies inside.
+Tiles without boxes are kept with probability --empty-frac (seeded by COLONYCOUNT_SEED).
 Each tile image record keeps its source, group and parent image.
 """
 
@@ -18,27 +19,30 @@ from collections import defaultdict
 from pathlib import Path
 
 import cv2
+from dotenv import load_dotenv
 
-from colonycount.detection.tiling import TILE_OVERLAP, TILE_SIZE, _tiles
+from colonycount._env import env_float, env_int, env_path
+from colonycount.detection.tiling import _tiles
 
-SEED = 0
-MIN_INSIDE = 0.5
 SPLITS = {"train": "train", "val": "valid"}  # ours -> rfdetr's folder names
 
 
-def tile_boxes(boxes, x, y, tile=TILE_SIZE):
-    """COCO xywh boxes clipped to the tile at (x, y), in tile pixels; drops < MIN_INSIDE inside."""
+def tile_boxes(boxes, x, y, tile):
+    """COCO xywh boxes clipped to the tile at (x, y), in tile pixels; drops mostly-outside ones."""
+    min_inside = env_float("COLONYCOUNT_TILE_MIN_INSIDE", 0.5, 0, 1)
     out = []
     for bx, by, bw, bh in boxes:
         x1, y1 = max(bx, x), max(by, y)
         x2, y2 = min(bx + bw, x + tile), min(by + bh, y + tile)
-        if x2 > x1 and y2 > y1 and (x2 - x1) * (y2 - y1) >= MIN_INSIDE * bw * bh:
+        if x2 > x1 and y2 > y1 and (x2 - x1) * (y2 - y1) >= min_inside * bw * bh:
             out.append([x1 - x, y1 - y, x2 - x1, y2 - y1])
     return out
 
 
-def tile_image(img, boxes, tile=TILE_SIZE, overlap=TILE_OVERLAP):
+def tile_image(img, boxes):
     """Yield (x, y, crop, tile boxes) over the inference tile grid; edge crops may be smaller."""
+    tile = env_int("COLONYCOUNT_TRAIN_TILE_SIZE", 640, lo=1)
+    overlap = env_int("COLONYCOUNT_TILE_OVERLAP", 64, lo=0)
     h, w = img.shape[:2]
     for y in _tiles(h, tile, overlap)[0]:
         for x in _tiles(w, tile, overlap)[0]:
@@ -80,15 +84,18 @@ def make_split(coco, data_dir: Path, out: Path, empty_frac: float, rng: random.R
 
 
 def main() -> None:
+    load_dotenv(".env")  # from the working directory; real environment variables win
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data-dir", type=Path, default=Path.home() / "data" / "colonycount")
+    ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
     ap.add_argument("--empty-frac", type=float, default=0.05)
     args = ap.parse_args()
-    root = args.data_dir / "public" / f"tiles_{TILE_SIZE}"
-    rng = random.Random(SEED)
+    data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
+    tile = env_int("COLONYCOUNT_TRAIN_TILE_SIZE", 640, lo=1)
+    root = data_dir / "public" / f"tiles_{tile}"
+    rng = random.Random(env_int("COLONYCOUNT_SEED", 0))
     for split, folder in SPLITS.items():
-        coco = json.loads((args.data_dir / "public" / "annotations" / f"{split}.json").read_text())
-        stats = make_split(coco, args.data_dir, root / folder, args.empty_frac, rng)
+        coco = json.loads((data_dir / "public" / "annotations" / f"{split}.json").read_text())
+        stats = make_split(coco, data_dir, root / folder, args.empty_frac, rng)
         print(split, stats, flush=True)
 
 

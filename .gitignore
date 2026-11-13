@@ -10,3 +10,6 @@ runs/
 build/
 .pytest_cache/
 .ruff_cache/
+.env
+.env.*
+!.env.dist

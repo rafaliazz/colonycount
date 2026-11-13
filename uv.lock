@@ -823,6 +823,7 @@ dependencies = [
     { name = "onnxruntime" },
     { name = "opencv-python-headless" },
     { name = "platformdirs" },
+    { name = "python-dotenv" },
 ]
 
 [package.optional-dependencies]
@@ -861,6 +862,7 @@ requires-dist = [
     { name = "onnxruntime" },
     { name = "opencv-python-headless" },
     { name = "platformdirs" },
+    { name = "python-dotenv", specifier = ">=1.2.4" },
     { name = "rfdetr", extras = ["train"], marker = "extra == 'train'", specifier = "==1.12.1" },
     { name = "torch", marker = "sys_platform == 'darwin' and extra == 'train'" },
     { name = "torch", marker = "sys_platform != 'darwin' and extra == 'train'", index = "https://download.pytorch.org/whl/cu130" },

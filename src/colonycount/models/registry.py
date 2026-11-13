@@ -11,6 +11,8 @@ from pathlib import Path
 
 import platformdirs
 
+from colonycount._env import env_path
+
 
 @dataclass(frozen=True)
 class Model:
@@ -36,9 +38,6 @@ MODELS = {
     ]
 }
 
-CACHE_DIR = platformdirs.user_cache_path("colonycount")
-ENV_VAR = "COLONYCOUNT_MODEL_PATH"
-
 
 def get(name: str) -> Model:
     try:
@@ -49,20 +48,25 @@ def get(name: str) -> Model:
         ) from None
 
 
-def resolve(name: str = "public", model_path: str | os.PathLike | None = None) -> tuple[Path, str]:
-    """Return (path to the ONNX file, model version), downloading and caching it if needed."""
+def resolve(name: str, model_path: str | os.PathLike | None = None) -> tuple[Path, str]:
+    """Return (path to the ONNX file, model version), downloading and caching it if needed.
+
+    ``model_path`` defaults to ``COLONYCOUNT_MODEL_PATH``; the cache is ``COLONYCOUNT_CACHE_DIR``
+    or the platform's user cache directory.
+    """
     model = get(name)
-    local = model_path or os.environ.get(ENV_VAR)
+    local = model_path or env_path("COLONYCOUNT_MODEL_PATH", None)
     if local:
         if not Path(local).is_file():
             raise FileNotFoundError(f"model file not found: {local}")
         return Path(local), "local"
     if model.sha256 is None:
         raise RuntimeError(
-            f"model {name!r} is not published yet; set {ENV_VAR} or pass model_path= "
+            f"model {name!r} is not published yet; set COLONYCOUNT_MODEL_PATH or pass model_path= "
             "to use a local ONNX file"
         )
-    target = CACHE_DIR / f"{model.name}-{model.version}.onnx"
+    cache = env_path("COLONYCOUNT_CACHE_DIR", None) or platformdirs.user_cache_path("colonycount")
+    target = cache / f"{model.name}-{model.version}.onnx"
     if not target.is_file():
         _download(model, target)
     return target, model.version

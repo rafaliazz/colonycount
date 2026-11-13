@@ -14,13 +14,11 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from colonycount._env import env_float, env_int, env_str
 from colonycount.detection.plate import find_plate
-from colonycount.detection.runner import load_session
-from colonycount.detection.tiling import TILE_OVERLAP, TILE_SIZE, detect_tiled, nms
+from colonycount.detection.runner import load_session, tile_size
+from colonycount.detection.tiling import detect_tiled, nms
 from colonycount.models import registry
-
-# ponytail: threshold is a placeholder until tasks 2.3/2.5 fix it.
-DEFAULT_THRESHOLD = 0.5
 
 
 @dataclass(frozen=True)
@@ -47,16 +45,27 @@ class Result:
 def count(
     image: str | os.PathLike | np.ndarray,
     *,
-    threshold: float = DEFAULT_THRESHOLD,
-    model: str = "public",
+    threshold: float | None = None,
+    model: str | None = None,
     model_path: str | os.PathLike | None = None,
-    tile_size: int = TILE_SIZE,
-    overlap: int = TILE_OVERLAP,
 ) -> Result:
-    """Count colonies in a plate photo (path or HxW / HxWx3 RGB array)."""
+    """Count colonies in a plate photo (path or HxW / HxWx3 RGB array).
+
+    ``threshold`` and ``model`` default to ``COLONYCOUNT_THRESHOLD`` / ``COLONYCOUNT_MODEL``;
+    the tile size comes from the model, the tile overlap from ``COLONYCOUNT_TILE_OVERLAP``.
+    """
+    if threshold is None:
+        # ponytail: 0.5 is a placeholder until tasks 2.3/2.5 fix it.
+        threshold = env_float("COLONYCOUNT_THRESHOLD", 0.5, 0, 1)
+    model = model or env_str("COLONYCOUNT_MODEL", "public")
     img = load_image(image)
     path, version = registry.resolve(model, model_path)
     session = load_session(str(path))
+    tile = tile_size(session)
+    # ponytail: 64 is a placeholder until task 2.3; colonies wider than it can split on a seam.
+    overlap = env_int("COLONYCOUNT_TILE_OVERLAP", 64, lo=0)
+    if overlap >= tile:
+        raise ValueError(f"COLONYCOUNT_TILE_OVERLAP ({overlap}) must be below the tile size {tile}")
 
     plate = find_plate(img)
     h, w = img.shape[:2]
@@ -66,7 +75,7 @@ def count(
         x1, y1 = min(w, math.ceil(cx + r) + 1), min(h, math.ceil(cy + r) + 1)
     else:
         x0, y0, x1, y1 = 0, 0, w, h
-    boxes, scores = detect_tiled(session, img[y0:y1, x0:x1], tile_size, overlap)
+    boxes, scores = detect_tiled(session, img[y0:y1, x0:x1], tile, overlap)
     boxes += [x0, y0, x0, y0]
 
     keep = scores >= threshold

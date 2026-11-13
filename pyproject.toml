@@ -14,6 +14,7 @@ dependencies = [
     "onnxruntime",
     "opencv-python-headless",
     "platformdirs",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.scripts]

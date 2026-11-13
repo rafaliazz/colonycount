@@ -9,12 +9,8 @@ import math
 import cv2
 import numpy as np
 
+from colonycount._env import env_float
 from colonycount.detection.runner import infer
-
-# ponytail: tile size and overlap are placeholders until tasks 2.3/2.5 fix them.
-TILE_SIZE = 640
-TILE_OVERLAP = 64  # colonies wider than this can be split across a seam
-NMS_IOU = 0.5
 
 
 def _tiles(n: int, tile: int, overlap: int) -> tuple[list[int], list[float]]:
@@ -52,6 +48,7 @@ def detect_tiled(session, crop: np.ndarray, tile: int, overlap: int):
 
 def nms(boxes: np.ndarray, scores: np.ndarray) -> np.ndarray:
     """Sorted indices of the boxes NMS keeps (scores are already thresholded)."""
+    iou = env_float("COLONYCOUNT_NMS_IOU", 0.5, 0, 1)
     xywh = np.column_stack([boxes[:, :2], boxes[:, 2:] - boxes[:, :2]])
-    idx = cv2.dnn.NMSBoxes(xywh.tolist(), scores.tolist(), 0.0, NMS_IOU)
+    idx = cv2.dnn.NMSBoxes(xywh.tolist(), scores.tolist(), 0.0, iou)
     return np.sort(np.asarray(idx, dtype=int).reshape(-1))
