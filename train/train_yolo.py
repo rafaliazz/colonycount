@@ -81,7 +81,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     try:
         args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
         if args.epochs is None:
-            args.epochs = env_int("COLONYCOUNT_TRAIN_EPOCHS", 20, lo=1)
+            args.epochs = env_int("COLONYCOUNT_TRAIN_EPOCHS", 12, lo=1)
     except ValueError as e:
         ap.error(str(e))
     if args.resume is not None and not args.resume.is_file():

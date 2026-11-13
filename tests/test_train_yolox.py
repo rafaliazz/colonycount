@@ -94,8 +94,9 @@ def test_config_effective_batch_and_resume_args(tmp_path, monkeypatch):
     monkeypatch.setenv("COLONYCOUNT_SEED", "7")
     for name in ("TRAIN_BATCH_SIZE", "TRAIN_GRAD_ACCUM", "TRAIN_TILE_SIZE", "TRAIN_EPOCHS"):
         monkeypatch.delenv(f"COLONYCOUNT_{name}", raising=False)
-    with pytest.raises(SystemExit):  # the 20-epoch default would need YOLOX's mosaic phase
-        train_yolox.parse_args(["--size", "m", "--data-dir", str(tmp_path)])
+    assert train_yolox.parse_args(["--size", "m", "--data-dir", str(tmp_path)]).epochs == 12
+    with pytest.raises(SystemExit):  # > 15 epochs would need YOLOX's mosaic phase
+        train_yolox.parse_args(["--size", "m", "--data-dir", str(tmp_path), "--epochs", "20"])
     args = train_yolox.parse_args(["--size", "m", "--data-dir", str(tmp_path), "--epochs", "12"])
     c = train_yolox.build_config(args)
     assert (c["epochs"], c["imgsz"], c["seed"], c["patience"]) == (12, 640, 7, 5)
