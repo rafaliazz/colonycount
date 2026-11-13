@@ -1,0 +1,15 @@
+YOLOX model code, vendored for colonycount's YOLOX baselines (train/train_yolox.py).
+
+Source: https://github.com/Megvii-BaseDetection/YOLOX
+Commit: 6ddff4824372906469a7fae2dc3206c7aa4bbaee (2025-06-08)
+Copyright (c) Megvii Inc. and its affiliates. Licensed under the Apache License 2.0 (LICENSE).
+
+Files: yolox/models/{yolox,yolo_head,yolo_pafpn,darknet,network_blocks,losses}.py and
+yolox/utils/{boxes,ema}.py, flattened into this directory.
+
+Changes (Apache-2.0 section 4(b)):
+- yolo_head.py: imports from .boxes instead of yolox.utils; stdlib logging instead of loguru;
+  meshgrid is torch.meshgrid(indexing="ij") (what yolox.utils.compat does on torch >= 1.10);
+  visualize_assign_result removed (needs yolox.utils.visualize).
+- yolox.py: visualize() removed (it calls visualize_assign_result).
+- __init__.py added. No other code changes.
