@@ -25,6 +25,10 @@ from colonycount._env import env_path
 FILES = {
     "rfdetr-nano": "run1/{split}",
     "rfdetr-nano-noplate": "run1/{split}-noplate",
+    "yolov8n": "yolov8n/{split}",
+    "yolov8n-noplate": "yolov8n/{split}-noplate",
+    "yolov8m": "yolov8m/{split}",
+    "yolov8m-noplate": "yolov8m/{split}-noplate",
     "opencfu": "final/opencfu-{split}",
     "opencfu-noplate": "final/opencfu-{split}-noplate",
     "opencfu-grid.jsonl": "opencfu-{split}-grid-partial.jsonl",
@@ -32,8 +36,12 @@ FILES = {
 }
 LABELS = {  # comparison.md row labels, in this order; compare.py appends (crop)/(whole image)
     "rfdetr-nano": "RF-DETR-nano",
+    "yolov8n": "YOLOv8-n",
+    "yolov8m": "YOLOv8-m",
     "opencfu": "OpenCFU",
     "rfdetr-nano-noplate": "RF-DETR-nano",
+    "yolov8n-noplate": "YOLOv8-n",
+    "yolov8m-noplate": "YOLOv8-m",
     "opencfu-noplate": "OpenCFU",
 }
 ABSOLUTE = re.compile(r"[A-Za-z]:[\\/]|(?<![\w.])/(home|Users|root|tmp|mnt|data)/|~[\\/]")
