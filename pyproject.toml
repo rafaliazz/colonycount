@@ -31,6 +31,10 @@ prepare = ["openpyxl"]
 # Benchmark-only YOLOv8 baseline (task 2.2). Ultralytics is AGPL-3.0: never a package dependency,
 # never imported from src/colonycount. Install: uv sync --extra train --group baseline
 baseline = ["ultralytics==8.4.211"]
+# YOLOX-Tiny/M baselines (task 2.3), Apache-2.0. The model code is vendored in
+# train/third_party/yolox (pinned commit, see its NOTICE); the PyPI/git package does not install on
+# 3.14. Torch comes from the train extra. Install: uv sync --extra train --group dev --group yolox
+yolox = ["pycocotools==2.0.11"]
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu130", marker = "sys_platform != 'darwin'" }]
@@ -50,6 +54,7 @@ pythonpath = ["train", "bench"]
 
 [tool.ruff]
 line-length = 100
+extend-exclude = ["train/third_party"]  # vendored as-is
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

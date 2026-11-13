@@ -466,6 +466,9 @@ dev = [
 prepare = [
     { name = "openpyxl" },
 ]
+yolox = [
+    { name = "pycocotools" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -494,6 +497,7 @@ dev = [
     { name = "ruff" },
 ]
 prepare = [{ name = "openpyxl" }]
+yolox = [{ name = "pycocotools", specifier = "==2.0.11" }]
 
 [[package]]
 name = "colorama"

@@ -18,7 +18,12 @@ from colonycount.detection.runner import load_session
 from colonycount.utils.cfu import range_flag
 
 ROOT = Path(__file__).parents[1]
-CODE = [p for d in ("src", "train", "bench") for p in sorted((ROOT / d).rglob("*.py"))]
+CODE = [
+    p
+    for d in ("src", "train", "bench")
+    for p in sorted((ROOT / d).rglob("*.py"))
+    if "third_party" not in p.parts  # vendored as-is (train/third_party/yolox)
+]
 
 
 def test_precedence_flag_env_dotenv_default(tmp_path, monkeypatch, local_model):
