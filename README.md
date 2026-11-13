@@ -6,6 +6,8 @@ Status: pre-alpha.
 
 Datasets, licenses and attribution: see [DATA.md](DATA.md).
 
+Benchmark results (val split, colonycount vs OpenCFU): [results/benchmark/val/comparison.md](results/benchmark/val/comparison.md).
+
 ## Quickstart
 
 > The built-in `public` model weights are **not published yet** (planned for v0.1), and the package is not on PyPI yet.

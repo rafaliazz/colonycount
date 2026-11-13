@@ -25,9 +25,20 @@ def table(reps: list[tuple[str, dict]], title: str, rows) -> list[str]:
     return [*out, ""]
 
 
+def summary(reps: list[tuple[str, dict]]) -> list[str]:
+    """Method, setting, threshold and CPU s/plate (only if publish_results.py added it)."""
+    out = ["| method | setting | threshold | CPU s/plate (median) |", "|---|---|---|---|"]
+    for label, rep in reps:
+        crop = "crop" if rep["plate_restriction"] else "whole image"
+        cpu = rep.get("cpu_s_per_plate", {}).get("median", "-")
+        setting, t = (rep["flags"], "-") if rep.get("flags") else (rep["model"], rep["threshold"])
+        out.append(f"| {label} ({crop}) | {setting} | {t} | {cpu} |")
+    return [*out, ""]
+
+
 def compare(reps: list[tuple[str, dict]]) -> str:
     first = reps[0][1]
-    out = []
+    out = summary(reps)
     for s in first["by_source"]:
         out += table(reps, s, lambda rep, s=s: rep["by_source"].get(s))
     for s, buckets in first["by_density"].items():
