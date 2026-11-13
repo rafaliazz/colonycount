@@ -11,6 +11,12 @@ weights at imgsz T, single class, seed COLONYCOUNT_SEED, early stopping (patienc
 <data-dir>/runs/yolov8<size>/<timestamp>/: results.csv (val metrics/mAP50(B) and mAP50-95(B) per
 epoch), weights/best.pt + last.pt, summary.json (config, wall time, peak VRAM).
 
+Same budget as RF-DETR: effective batch nbs = COLONYCOUNT_TRAIN_BATCH_SIZE x
+COLONYCOUNT_TRAIN_GRAD_ACCUM (16), which Ultralytics reaches by accumulating
+max(round(nbs / batch), 1) steps; optimizer, lr and augmentation stay Ultralytics' own recipe. The
+resolved comparable config (epochs, imgsz, seed, patience, nbs, per-step batch, accumulate,
+optimizer, amp) is printed at train start and saved as "comparable" in summary.json.
+
 --batch -1 (default) lets Ultralytics' AutoBatch pick the batch for ~60% of GPU memory. --resume
 continues in the same run dir with the checkpoint's own settings (epochs included); only batch,
 workers and patience can change. --fraction trains on part of train (smoke runs).
@@ -100,6 +106,9 @@ def build_config(args: argparse.Namespace, data_yaml: Path) -> dict:
         single_cls=True,
         max_det=300,  # dense tiles; inference caps per tile pass, tiling keeps plates uncapped
         patience=5,
+        # effective batch, as RF-DETR's batch x grad accum; Ultralytics accumulates up to it
+        nbs=env_int("COLONYCOUNT_TRAIN_BATCH_SIZE", 2, lo=1)
+        * env_int("COLONYCOUNT_TRAIN_GRAD_ACCUM", 8, lo=1),
         project=str(args.data_dir / "runs" / f"yolov8{args.size}"),
         name=time.strftime("%Y%m%d-%H%M%S"),
         plots=False,
@@ -108,6 +117,29 @@ def build_config(args: argparse.Namespace, data_yaml: Path) -> dict:
 
 def _batch(b: float) -> int | float:
     return int(b) if b == int(b) else b  # Ultralytics: int = batch size, float = GPU fraction
+
+
+def comparable(trainer) -> dict:
+    """The settings that must match RF-DETR's run, as Ultralytics resolved them."""
+    a, batch = trainer.args, trainer.batch_size
+    c = {
+        "epochs": a.epochs,
+        "imgsz": a.imgsz,
+        "seed": a.seed,
+        "patience": a.patience,
+        "nbs": a.nbs,  # effective batch
+        "batch": batch,  # per step
+        "accumulate": getattr(trainer, "accumulate", max(round(a.nbs / batch), 1)),
+        "optimizer": type(trainer.optimizer).__name__ if trainer.optimizer else a.optimizer,
+        "amp": bool(trainer.amp),
+    }
+    print("comparable config:", json.dumps(c))
+    if batch > a.nbs:
+        print(
+            f"WARNING: per-step batch {batch} > nbs {a.nbs}: no accumulation, effective batch "
+            f"is {batch}, not {a.nbs}"
+        )
+    return c
 
 
 def main() -> None:
@@ -125,10 +157,13 @@ def main() -> None:
     model = YOLO(str(args.resume) if args.resume else f"yolov8{args.size}.pt")
     # peak VRAM of training + val, not of AutoBatch's probing during setup
     model.add_callback("on_train_start", lambda _: torch.cuda.reset_peak_memory_stats())
+    resolved: dict = {}
+    model.add_callback("on_train_start", lambda t: resolved.update(comparable(t)))
     model.train(**config)
     out = Path(model.trainer.save_dir)
     summary = {
         "config": config,
+        "comparable": resolved,
         "batch": model.trainer.batch_size,
         "wall_s": round(time.time() - t0),
         "peak_vram_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2),
