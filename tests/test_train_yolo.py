@@ -39,10 +39,16 @@ def test_coco_to_yolo_writes_normalised_labels_and_data_yaml(tmp_path):
 
 def test_config_new_run_and_resume(tmp_path, monkeypatch):
     monkeypatch.setenv("COLONYCOUNT_SEED", "7")
+    monkeypatch.delenv("COLONYCOUNT_TRAIN_BATCH_SIZE", raising=False)
+    monkeypatch.delenv("COLONYCOUNT_TRAIN_GRAD_ACCUM", raising=False)
     args = train_yolo.parse_args(["--size", "m", "--data-dir", str(tmp_path), "--epochs", "3"])
     c = train_yolo.build_config(args, tmp_path / "data.yaml")
     assert (c["epochs"], c["imgsz"], c["seed"], c["batch"], c["single_cls"]) == (3, 640, 7, -1, 1)
     assert c["max_det"] >= 300 and c["project"] == str(tmp_path / "runs" / "yolov8m")
+    assert c["nbs"] == 16  # RF-DETR's effective batch: 2 x grad accum 8
+    monkeypatch.setenv("COLONYCOUNT_TRAIN_BATCH_SIZE", "4")
+    monkeypatch.setenv("COLONYCOUNT_TRAIN_GRAD_ACCUM", "3")
+    assert train_yolo.build_config(args, tmp_path / "data.yaml")["nbs"] == 12
     assert train_yolo.build_config(
         train_yolo.parse_args(["--size", "n", "--batch", "0.7"]), tmp_path
     )["batch"] == pytest.approx(0.7)
@@ -59,6 +65,18 @@ def test_config_new_run_and_resume(tmp_path, monkeypatch):
         train_yolo.parse_args(["--size", "n", "--resume", str(tmp_path / "nope.pt")])
     with pytest.raises(SystemExit):
         train_yolo.parse_args(["--size", "x"])
+
+
+def test_comparable_config_and_no_accumulation_warning(capsys):
+    from types import SimpleNamespace as NS
+
+    a = NS(epochs=12, imgsz=640, seed=0, patience=5, nbs=16, optimizer="auto")
+    t = NS(args=a, batch_size=3, optimizer=NS(), amp=True)  # no .accumulate: computed
+    c = train_yolo.comparable(t)
+    assert (c["nbs"], c["batch"], c["accumulate"], c["amp"]) == (16, 3, 5, True)
+    assert "WARNING" not in capsys.readouterr().out
+    train_yolo.comparable(NS(args=a, batch_size=32, optimizer=None, amp=False, accumulate=1))
+    assert "WARNING" in capsys.readouterr().out
 
 
 data = env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
