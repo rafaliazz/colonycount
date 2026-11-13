@@ -7,6 +7,8 @@
 docker build -t colonycount-opencfu bench/opencfu
 uv run python bench/opencfu_runner.py --tune               # val, plate crop; grid-search settings
 uv run python bench/opencfu_runner.py --tune --no-plate    # val, whole image
+# one fixed setting (keys as DEFAULT in opencfu_runner.py), e.g. the final crop-on run:
+uv run python bench/opencfu_runner.py --setting '{"side": 1000, "mode": "bil -t 5", "r_min": 0.004, "r_max": 0.06}'
 ```
 
 The image's working directory is `/usr/share/opencfu`, because `opencfu` loads its colony
