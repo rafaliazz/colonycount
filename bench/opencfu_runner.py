@@ -1,6 +1,7 @@
 """OpenCFU baseline (model-benchmark task 2.1), scored with bench/evaluate.py's metrics.
 
-Usage: uv run python bench/opencfu_runner.py [--split val] [--no-plate] [--tune] [--out DIR]
+Usage: uv run python bench/opencfu_runner.py [--split val] [--no-plate] [--tune | --setting JSON]
+       [--out DIR]
 Needs Docker and the image: ``docker build -t colonycount-opencfu bench/opencfu``.
 
 Each plate is cropped like colonycount does (find_plate's bounding square; whole image when no

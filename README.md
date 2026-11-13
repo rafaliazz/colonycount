@@ -14,6 +14,8 @@ Benchmark results (val split, colonycount vs OpenCFU): [results/benchmark/val/co
 > Until then, install from source and point colonycount at a local ONNX detector with `COLONYCOUNT_MODEL_PATH` (or `model_path=` / `--model-path`).
 > The model's input/output contract is documented in `src/colonycount/detection/runner.py`.
 
+Requires Python 3.14. On an older Python, get 3.14 with `uv python install 3.14` (no admin rights needed).
+
 Install (once released):
 
 ```sh
@@ -56,7 +58,7 @@ The inference tile size is not a setting: it is read from the ONNX model's input
 
 ## Development
 
-Requires [uv](https://docs.astral.sh/uv/).
+Requires [uv](https://docs.astral.sh/uv/); it fetches Python 3.14 (pinned in `.python-version`) if you don't have it.
 
 ```sh
 uv sync                 # core + dev tools
@@ -65,6 +67,6 @@ uv run ruff check && uv run ruff format --check
 uv run pre-commit install   # hooks: ruff on commit; lock check + pytest on push
 ```
 
-CI lints, builds the package (wheel + sdist, install-tested) and runs tests on Linux, Windows and macOS.
+CI lints, builds the package (wheel + sdist, install-tested) and runs tests on Linux, Windows and macOS, all on Python 3.14.
 
 Optional extras: `uv sync --extra napari`, `--extra demo`, `--extra train`.
