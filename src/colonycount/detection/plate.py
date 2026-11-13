@@ -3,13 +3,14 @@
 import cv2
 import numpy as np
 
-PLATE_SEARCH_SIZE = 512  # longest side of the downscaled copy used to find the plate
+from colonycount._env import env_int
 
 
 def find_plate(img: np.ndarray) -> tuple[float, float, float] | None:
     """Return the plate circle (cx, cy, r) in image pixels, or None if no rim is found."""
+    search = env_int("COLONYCOUNT_PLATE_SEARCH_SIZE", 512, lo=1)  # longest side of the copy
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    scale = min(1.0, PLATE_SEARCH_SIZE / max(gray.shape))
+    scale = min(1.0, search / max(gray.shape))
     small = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
     small = cv2.medianBlur(small, 9)  # wipes out colonies, keeps the rim
     side = min(small.shape)

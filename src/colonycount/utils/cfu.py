@@ -1,6 +1,6 @@
 """CFU/mL from a plate count, and countable-range flags."""
 
-COUNTABLE_RANGE = (30, 300)
+from colonycount._env import env_tuple
 
 
 def cfu_per_ml(count: int, dilution: float | None, volume: float | None) -> float:
@@ -11,8 +11,13 @@ def cfu_per_ml(count: int, dilution: float | None, volume: float | None) -> floa
     return count / (dilution * volume)
 
 
-def range_flag(count: int, low: int = COUNTABLE_RANGE[0], high: int = COUNTABLE_RANGE[1]) -> str:
-    """'TFTC' below `low`, 'TNTC' above `high`, '' inside the countable range."""
+def range_flag(count: int, low: int | None = None, high: int | None = None) -> str:
+    """'TFTC' below `low`, 'TNTC' above `high`, 'OK' inside the countable range.
+
+    The range defaults to ``COLONYCOUNT_COUNTABLE_RANGE``.
+    """
+    if low is None or high is None:
+        low, high = env_tuple("COLONYCOUNT_COUNTABLE_RANGE", (30, 300))
     if low > high:
         raise ValueError(f"countable range low ({low}) is above high ({high})")
     return "TFTC" if count < low else "TNTC" if count > high else "OK"

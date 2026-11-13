@@ -1,12 +1,13 @@
 """colony-detection spec scenarios (model registry and offline ones are in test_registry.py)."""
 
+import conftest
 import cv2
 import numpy as np
 import pytest
-from conftest import MAX_PER_PASS, make_plate
+from conftest import make_plate
 
 import colonycount
-from colonycount.detection.runner import load_session
+from colonycount.detection.runner import load_session, tile_size
 from colonycount.detection.tiling import detect_tiled
 
 
@@ -74,14 +75,28 @@ def test_raising_threshold_never_increases_count(local_model):
     assert counts[0] > counts[-1]
 
 
-def test_crowded_plate_not_capped(local_model):
+def test_crowded_plate_not_capped(placeholder, monkeypatch):
     img, truth = make_plate(n=800, size=560, radius=250, spacing=14)
-    assert colonycount.count(img, tile_size=1024).total == MAX_PER_PASS  # one pass is capped
-    r = colonycount.count(img, tile_size=160, overlap=32)
+    one_pass = colonycount.count(img, model_path=placeholder(1024))
+    assert one_pass.total == conftest.MAX_PER_PASS  # one pass is capped
+    monkeypatch.setenv("COLONYCOUNT_TILE_OVERLAP", "32")
+    r = colonycount.count(img, model_path=placeholder(160))
     assert r.total == 800 and matched(r, truth)
 
 
-def test_tile_seams_count_once(local_model):
+def test_tile_seams_count_once(placeholder, monkeypatch):
     img, truth = make_plate(n=60, spacing=16, seed=1)
-    r = colonycount.count(img, tile_size=96, overlap=24)
+    monkeypatch.setenv("COLONYCOUNT_TILE_OVERLAP", "24")
+    r = colonycount.count(img, model_path=placeholder(96))
     assert r.total == len(truth) and matched(r, truth)
+
+
+@pytest.mark.parametrize("tile", [96, 160])
+def test_tile_size_comes_from_the_model(placeholder, tile):
+    assert tile_size(load_session(str(placeholder(tile)))) == tile
+
+
+def test_overlap_must_be_below_tile_size(placeholder, monkeypatch):
+    monkeypatch.setenv("COLONYCOUNT_TILE_OVERLAP", "96")
+    with pytest.raises(ValueError, match="COLONYCOUNT_TILE_OVERLAP"):
+        colonycount.count(make_plate()[0], model_path=placeholder(96))

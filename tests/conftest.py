@@ -1,5 +1,8 @@
 """Placeholder ONNX detector and synthetic plate images (no dataset files in the repo)."""
 
+import functools
+import os
+
 import cv2
 import numpy as np
 import onnx
@@ -10,8 +13,8 @@ MAX_PER_PASS = 300  # like a real detector's query/anchor cap
 BOX = 4.0  # half side of every box the placeholder emits
 
 
-def build_placeholder_model(path):
-    """Bright-spot detector following the detection/runner.py contract.
+def build_placeholder_model(path, tile=640):
+    """Bright-spot detector following the detection/runner.py contract, with tile size `tile`.
 
     A pixel is a colony centre if it is the max of its 7x7 neighbourhood and brighter than 0.5
     (channel mean); its score is that brightness. At most MAX_PER_PASS boxes per pass (top-k).
@@ -54,7 +57,7 @@ def build_placeholder_model(path):
     graph = helper.make_graph(
         nodes,
         "placeholder",
-        [helper.make_tensor_value_info("images", TensorProto.FLOAT, [1, 3, "H", "W"])],
+        [helper.make_tensor_value_info("images", TensorProto.FLOAT, [1, 3, tile, tile])],
         [
             helper.make_tensor_value_info("boxes", TensorProto.FLOAT, ["N", 4]),
             helper.make_tensor_value_info("scores", TensorProto.FLOAT, ["N"]),
@@ -100,9 +103,25 @@ def make_plate(
     return np.dstack([img] * 3), pts
 
 
+@pytest.fixture(autouse=True)
+def _restore_environ():
+    """Undo env changes that bypass monkeypatch, e.g. load_dotenv() in an entry point."""
+    before = dict(os.environ)
+    yield
+    os.environ.clear()
+    os.environ.update(before)
+
+
 @pytest.fixture(scope="session")
-def model_file(tmp_path_factory):
-    return build_placeholder_model(tmp_path_factory.mktemp("model") / "placeholder.onnx")
+def placeholder(tmp_path_factory):
+    """placeholder(tile) -> path of a placeholder model with that tile size (built once)."""
+    d = tmp_path_factory.mktemp("model")
+    return functools.cache(lambda tile=640: build_placeholder_model(d / f"p{tile}.onnx", tile))
+
+
+@pytest.fixture(scope="session")
+def model_file(placeholder):
+    return placeholder(640)
 
 
 @pytest.fixture

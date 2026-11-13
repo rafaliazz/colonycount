@@ -20,8 +20,8 @@ def published(model_file, monkeypatch, tmp_path):
     """Registry whose models are 'published' at a local file:// URL; records download calls."""
     sha = hashlib.sha256(model_file.read_bytes()).hexdigest()
     url = model_file.as_uri()
-    monkeypatch.delenv(registry.ENV_VAR, raising=False)
-    monkeypatch.setattr(registry, "CACHE_DIR", tmp_path / "cache")
+    monkeypatch.delenv("COLONYCOUNT_MODEL_PATH", raising=False)
+    monkeypatch.setenv("COLONYCOUNT_CACHE_DIR", str(tmp_path / "cache"))
     monkeypatch.setattr(
         registry,
         "MODELS",
@@ -41,9 +41,9 @@ def published(model_file, monkeypatch, tmp_path):
     return calls
 
 
-def test_first_run_downloads_verifies_and_caches(published):
+def test_first_run_downloads_verifies_and_caches(published, tmp_path):
     path, version = registry.resolve("public")
-    assert path.parent == registry.CACHE_DIR and version == "9.9"
+    assert path.parent == tmp_path / "cache" and version == "9.9"
     assert registry.resolve("public")[0] == path
     assert len(published) == 1  # downloaded once
     assert colonycount.count(make_plate()[0]).model_version == "9.9"
@@ -62,14 +62,14 @@ def test_no_network_without_cache(published, monkeypatch):
         registry.resolve("public")
 
 
-def test_checksum_mismatch(published, monkeypatch):
+def test_checksum_mismatch(published, monkeypatch, tmp_path):
     m = registry.MODELS["public"]
     monkeypatch.setitem(
         registry.MODELS, "public", registry.Model(**{**vars(m), "sha256": "0" * 64})
     )
     with pytest.raises(RuntimeError, match="checksum mismatch"):
         registry.resolve("public")
-    assert not any(registry.CACHE_DIR.iterdir())  # nothing unverified left in the cache
+    assert not any((tmp_path / "cache").iterdir())  # nothing unverified left in the cache
 
 
 def test_choose_model(published):
@@ -83,7 +83,7 @@ def test_unknown_model(local_model):
 
 
 def test_unpublished_model_points_to_local_override(monkeypatch):
-    monkeypatch.delenv(registry.ENV_VAR, raising=False)
+    monkeypatch.delenv("COLONYCOUNT_MODEL_PATH", raising=False)
     with pytest.raises(RuntimeError, match="not published yet.*COLONYCOUNT_MODEL_PATH"):
         registry.resolve("public")
 

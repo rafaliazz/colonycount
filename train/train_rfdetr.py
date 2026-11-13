@@ -18,19 +18,30 @@ import json
 import time
 from pathlib import Path
 
-from colonycount.detection.tiling import TILE_SIZE
+from dotenv import load_dotenv
 
-SEED = 0
+from colonycount._env import env_int, env_path
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Given flags win; the others fall back to their COLONYCOUNT_* variable, then the default."""
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data-dir", type=Path, default=Path.home() / "data" / "colonycount")
-    ap.add_argument("--epochs", type=int, default=20)
-    ap.add_argument("--batch-size", type=int, default=2)
-    ap.add_argument("--grad-accum", type=int, default=8)
+    ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
+    ap.add_argument("--epochs", type=int, help="default: COLONYCOUNT_TRAIN_EPOCHS")
+    ap.add_argument("--batch-size", type=int, help="default: COLONYCOUNT_TRAIN_BATCH_SIZE")
+    ap.add_argument("--grad-accum", type=int, help="default: COLONYCOUNT_TRAIN_GRAD_ACCUM")
     ap.add_argument("--resume", type=Path, help="last.ckpt of a stopped run to continue")
     args = ap.parse_args(argv)
+    try:
+        args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
+        if args.epochs is None:
+            args.epochs = env_int("COLONYCOUNT_TRAIN_EPOCHS", 20, lo=1)
+        if args.batch_size is None:
+            args.batch_size = env_int("COLONYCOUNT_TRAIN_BATCH_SIZE", 2, lo=1)
+        if args.grad_accum is None:
+            args.grad_accum = env_int("COLONYCOUNT_TRAIN_GRAD_ACCUM", 8, lo=1)
+    except ValueError as e:
+        ap.error(str(e))
     if args.resume is not None and not args.resume.is_file():
         ap.error(f"--resume: no checkpoint at {args.resume}")
     return args
@@ -41,14 +52,15 @@ def build_config(args: argparse.Namespace) -> dict:
         out = args.resume.parent  # keep one run dir, so metrics.csv stays a single log
     else:
         out = args.data_dir / "runs" / "rfdetr_nano" / time.strftime("%Y%m%d-%H%M%S")
+    tile = env_int("COLONYCOUNT_TRAIN_TILE_SIZE", 640, lo=1)
     config = dict(
-        dataset_dir=str(args.data_dir / "public" / f"tiles_{TILE_SIZE}"),
+        dataset_dir=str(args.data_dir / "public" / f"tiles_{tile}"),
         output_dir=str(out),
         epochs=args.epochs,
         batch_size=args.batch_size,
         grad_accum_steps=args.grad_accum,
-        resolution=TILE_SIZE,  # native-resolution tiles, as at inference
-        seed=SEED,
+        resolution=tile,  # native-resolution tiles, as at inference
+        seed=env_int("COLONYCOUNT_SEED", 0),
         amp_dtype="auto",
         early_stopping=True,
         early_stopping_patience=5,
@@ -61,6 +73,7 @@ def build_config(args: argparse.Namespace) -> dict:
 
 
 def main() -> None:
+    load_dotenv(".env")  # from the working directory; real environment variables win
     args = parse_args()
     config = build_config(args)
 

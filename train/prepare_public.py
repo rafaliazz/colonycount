@@ -8,7 +8,8 @@ Sources
 Usage: uv run --group prepare python train/prepare_public.py [--data-dir DIR] [--skip-download]
 
 Writes <data-dir>/public/annotations/{train,val,test,adapt}.json + splits.json; image
-paths are relative to the data dir. The adapt pool is 20 images taken out of smartphone train.
+paths are relative to the data dir. Split fractions, seed and the size of the adapt pool (taken
+out of smartphone train) come from COLONYCOUNT_SPLIT_FRACTIONS, _SEED and _ADAPT_SIZE.
 """
 
 from __future__ import annotations
@@ -22,15 +23,16 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+from colonycount._env import env_int, env_path, env_tuple
+
 FIGSHARE_API = "https://api.figshare.com/v2/articles/22022540"
 ZENODO_API = "https://zenodo.org/api/records/18256864"
 CLINICAL_FILES = ("Bacterial_Image_Records.xlsx", "label.zip", "images.zip")
 # label.zip ships the same boxes as LabelMe (~7.6 GB, embedded images), VOC, YOLO, CSV and
 # COCO; only the COCO file is kept. None = extract everything.
 CLINICAL_KEEP = {"label.zip": ["label/coco_json/coco.json"]}
-SEED = 0
-SPLIT_FRACTIONS = {"train": 0.70, "val": 0.15, "test": 0.15}
-ADAPT_SIZE = 20
 
 
 # --- download -------------------------------------------------------------------------
@@ -159,32 +161,45 @@ def to_coco(records: list[dict]) -> dict:
     }
 
 
-def split_by_group(records: list[dict], seed: int = SEED) -> dict[str, list[dict]]:
+def _fractions() -> dict[str, float]:
+    fractions = env_tuple("COLONYCOUNT_SPLIT_FRACTIONS", (0.70, 0.15, 0.15))
+    return dict(zip(("train", "val", "test"), fractions, strict=True))
+
+
+def _seed(seed: int | None) -> int:
+    return env_int("COLONYCOUNT_SEED", 0) if seed is None else seed
+
+
+def split_by_group(records: list[dict], seed: int | None = None) -> dict[str, list[dict]]:
     """Whole groups go to train/val/test; each group joins the split furthest below its
     image-count target, visiting groups in a seeded shuffle."""
+    fractions = _fractions()
     by_group: dict[str, list[dict]] = {}
     for r in records:
         by_group.setdefault(r["group"], []).append(r)
     groups = sorted(by_group)
-    random.Random(seed).shuffle(groups)
-    out: dict[str, list[dict]] = {s: [] for s in SPLIT_FRACTIONS}
+    random.Random(_seed(seed)).shuffle(groups)
+    out: dict[str, list[dict]] = {s: [] for s in fractions}
     for g in groups:
-        s = max(out, key=lambda s: SPLIT_FRACTIONS[s] * len(records) - len(out[s]))
+        s = max(out, key=lambda s: fractions[s] * len(records) - len(out[s]))
         out[s] += by_group[g]
     return out
 
 
-def take_adapt_pool(train: list[dict], n: int = ADAPT_SIZE, seed: int = SEED):
+def take_adapt_pool(train: list[dict], n: int | None = None, seed: int | None = None):
     """Fixed n-image pool out of `train`; returns (remaining train, pool)."""
-    pool = random.Random(seed).sample(sorted(train, key=lambda r: r["file_name"]), n)
+    if n is None:
+        n = env_int("COLONYCOUNT_ADAPT_SIZE", 20, lo=0)
+    pool = random.Random(_seed(seed)).sample(sorted(train, key=lambda r: r["file_name"]), n)
     names = {r["file_name"] for r in pool}
     return [r for r in train if r["file_name"] not in names], pool
 
 
-def build_splits(sources: dict[str, list[dict]], seed: int = SEED):
+def build_splits(sources: dict[str, list[dict]], seed: int | None = None):
     """Per-source group split, merged; adaptation pool comes from smartphone train."""
-    splits: dict[str, list[dict]] = {s: [] for s in SPLIT_FRACTIONS}
-    groups: dict[str, dict[str, list[str]]] = {s: {} for s in SPLIT_FRACTIONS}
+    seed, fractions = _seed(seed), _fractions()
+    splits: dict[str, list[dict]] = {s: [] for s in fractions}
+    groups: dict[str, dict[str, list[str]]] = {s: {} for s in fractions}
     for source, records in sources.items():
         for s, recs in split_by_group(records, seed).items():
             groups[s][source] = sorted({r["group"] for r in recs})
@@ -193,7 +208,7 @@ def build_splits(sources: dict[str, list[dict]], seed: int = SEED):
             splits[s] += recs
     manifest = {
         "seed": seed,
-        "fractions": SPLIT_FRACTIONS,
+        "fractions": fractions,
         "groups": groups,
         "adapt": sorted(r["file_name"] for r in splits.get("adapt", [])),
     }
@@ -233,11 +248,16 @@ def clinical_records(root: Path) -> list[dict]:
 
 
 def main(argv: list[str] | None = None) -> None:
+    load_dotenv(".env")  # from the working directory; real environment variables win
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    p.add_argument("--data-dir", type=Path, default=Path("~/data/colonycount"))
+    p.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
     p.add_argument("--skip-download", action="store_true")
     args = p.parse_args(argv)
-    data_dir = args.data_dir.expanduser()
+    data_dir = (
+        args.data_dir.expanduser()
+        if args.data_dir
+        else env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
+    )
     root = data_dir / "public"
     if not args.skip_download:
         download_smartphone(root)

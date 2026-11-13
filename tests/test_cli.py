@@ -8,7 +8,8 @@ import pytest
 from conftest import make_plate
 
 import colonycount
-from colonycount.cli import COLUMNS, main
+from colonycount import cli
+from colonycount.cli import main
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ def plates(tmp_path, local_model):
 def read(path):
     with open(path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    assert list(rows[0]) == COLUMNS
+    assert list(rows[0]) == cli.COLUMNS
     return {r["file"].replace("\\", "/").rsplit("/", 1)[-1]: r for r in rows}
 
 

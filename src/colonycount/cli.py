@@ -7,8 +7,11 @@ import json
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 import colonycount
-from colonycount.detection.pipeline import DEFAULT_THRESHOLD, count
+from colonycount._env import env_float, env_str
+from colonycount.detection.pipeline import count
 from colonycount.models import registry
 from colonycount.utils import cfu
 
@@ -27,22 +30,23 @@ COLUMNS = [
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_dotenv(".env")  # from the working directory; real environment variables win
     p = argparse.ArgumentParser(prog="colonycount", description=__doc__)
     p.add_argument("images", nargs="*", help="image files or glob patterns (e.g. plates/*.jpg)")
     p.add_argument("--dilution", type=float, help="dilution factor of the plated sample, e.g. 1e-4")
     p.add_argument("--volume", type=float, help="plated volume in mL, e.g. 0.1")
-    p.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD)
-    p.add_argument("--model", default="public", help="built-in model name (see --list-models)")
+    p.add_argument("--threshold", type=float, help="score threshold (COLONYCOUNT_THRESHOLD)")
+    p.add_argument("--model", help="built-in model name, see --list-models (COLONYCOUNT_MODEL)")
     p.add_argument(
-        "--model-path", help=f"local ONNX file instead of a built-in model ({registry.ENV_VAR})"
+        "--model-path", help="local ONNX file instead of a built-in model (COLONYCOUNT_MODEL_PATH)"
     )
     p.add_argument(
         "--range",
         nargs=2,
         type=int,
-        default=cfu.COUNTABLE_RANGE,
+        default=(),
         metavar=("LOW", "HIGH"),
-        help="countable range for TFTC/TNTC flags (default: 30 300)",
+        help="countable range for TFTC/TNTC flags (COLONYCOUNT_COUNTABLE_RANGE, default: 30 300)",
     )
     p.add_argument("-o", "--output", help="CSV file to write (default: stdout)")
     p.add_argument(
@@ -59,6 +63,9 @@ def main(argv: list[str] | None = None) -> int:
         p.error("no images given")
     want_cfu = args.dilution is not None or args.volume is not None
     try:
+        if args.threshold is None:
+            args.threshold = env_float("COLONYCOUNT_THRESHOLD", 0.5, 0, 1)
+        args.model = args.model or env_str("COLONYCOUNT_MODEL", "public")
         registry.get(args.model)
         cfu.range_flag(0, *args.range)
         if want_cfu:

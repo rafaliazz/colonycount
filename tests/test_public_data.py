@@ -1,12 +1,12 @@
 """Checks the real prepared data; skipped unless train/prepare_public.py has been run."""
 
 import json
-import os
-from pathlib import Path
 
 import pytest
 
-DATA = Path(os.environ.get("COLONYCOUNT_DATA_DIR", "~/data/colonycount")).expanduser()
+from colonycount._env import env_path
+
+DATA = env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
 ANN = DATA / "public" / "annotations"
 pytestmark = pytest.mark.skipif(not (ANN / "splits.json").exists(), reason=f"no data in {ANN}")
 
