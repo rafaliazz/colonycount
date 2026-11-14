@@ -7,7 +7,8 @@ NeuroSYS, CC BY-NC 2.0 (see DATA.md).
 Usage: uv run --group prepare python train/prepare_agar.py [--agar-dir DIR] [--verify-only]
 
 Files land in <agar-dir>/hf; the download is resumable and adopts files already present there
-(e.g. from `hf download leodriesch/agar --local-dir <agar-dir>/hf`). Every file is then checked
+(e.g. from `hf download leodriesch/agar --local-dir <agar-dir>/hf`); plain HTTP via the standard
+library, no huggingface_hub (its Xet transfer was ~200x slower here). Every file is then checked
 against the revision's SHA-256 (LFS files) or git blob SHA-1 (small files); any missing file or
 mismatch exits non-zero. <agar-dir> comes from COLONYCOUNT_AGAR_DIR, default <data dir>/agar.
 
@@ -20,12 +21,19 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
+import re
+import urllib.parse
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from dotenv import load_dotenv
+from prepare_public import download
 
 from colonycount._env import env_path
 
+API = "https://huggingface.co"
 REPO_ID = "leodriesch/agar"
 REVISION = "9ce24ca6611a700b2c61d22946786630c65e7764"
 
@@ -42,17 +50,35 @@ def _digest(path: Path, algo: str) -> str:
 
 def expected_files() -> dict[str, tuple[int, str, str]]:
     """{path: (size, algo, hex digest)} for every file of the pinned revision."""
-    from huggingface_hub import HfApi  # prepare group only, not in CI
-
-    tree = HfApi().list_repo_tree(
-        REPO_ID, repo_type="dataset", revision=REVISION, recursive=True, expand=True
-    )
+    url = f"{API}/api/datasets/{REPO_ID}/tree/{REVISION}?recursive=true"
     out = {}
-    for f in tree:
-        if not hasattr(f, "size"):  # folder
-            continue
-        out[f.path] = (f.size, "sha256", f.lfs.sha256) if f.lfs else (f.size, "sha1", f.blob_id)
+    while url:
+        req = urllib.request.Request(url, headers={"User-Agent": "colonycount-prepare"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            entries = json.load(r)
+            link = re.search(r'<([^>]+)>;\s*rel="next"', r.headers.get("Link", ""))
+        url = link and link.group(1)
+        for f in entries:
+            if f["type"] == "file":
+                lfs = f.get("lfs")
+                out[f["path"]] = (
+                    (f["size"], "sha256", lfs["oid"]) if lfs else (f["size"], "sha1", f["oid"])
+                )
     return out
+
+
+def fetch_all(expected: dict[str, tuple[int, str, str]], root: Path, workers: int = 4) -> None:
+    """Download every file not already present (right size) into `root`, a few at a time."""
+
+    def one(item):
+        rel, (size, algo, digest) = item
+        if (root / rel).is_file():
+            return
+        url = f"{API}/datasets/{REPO_ID}/resolve/{REVISION}/{urllib.parse.quote(rel)}"
+        download(url, root / rel, digest, digest=lambda p: _digest(p, algo))
+
+    with ThreadPoolExecutor(workers) as ex:
+        list(ex.map(one, expected.items()))
 
 
 def verify(expected: dict[str, tuple[int, str, str]], root: Path) -> list[str]:
@@ -84,11 +110,10 @@ def main(argv: list[str] | None = None) -> None:
         or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount") / "agar"
     )
     root = agar_dir / "hf"
+    expected = expected_files()
     if not args.verify_only:
-        from huggingface_hub import snapshot_download
-
-        snapshot_download(REPO_ID, repo_type="dataset", revision=REVISION, local_dir=root)
-    problems = verify(expected_files(), root)
+        fetch_all(expected, root)
+    problems = verify(expected, root)
     if problems:
         raise SystemExit("\n".join(problems) + f"\n{len(problems)} problem(s) in {root}")
     print(f"AGAR verified in {root}")

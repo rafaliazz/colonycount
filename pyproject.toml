@@ -27,7 +27,7 @@ train = ["rfdetr[train]==1.12.1", "torch", "torchvision"]
 
 [dependency-groups]
 dev = ["onnx", "pre-commit", "pytest", "ruff"]
-prepare = ["huggingface-hub", "openpyxl"]
+prepare = ["openpyxl"]
 # Benchmark-only YOLOv8 baseline (task 2.2). Ultralytics is AGPL-3.0: never a package dependency,
 # never imported from src/colonycount. Install: uv sync --extra train --group baseline
 baseline = ["ultralytics==8.4.211"]

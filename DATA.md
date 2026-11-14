@@ -45,7 +45,7 @@ Dataset: NeuroSYS Sp. z o.o., <https://agar.neurosys.com>. Licensed under [CC BY
 
 Changes made (planned, phase B): converted to COCO format; split by imaging setup.
 
-Mirror used for download: Hugging Face dataset [`leodriesch/agar`](https://huggingface.co/datasets/leodriesch/agar), pinned to revision `9ce24ca6611a700b2c61d22946786630c65e7764` (last modified 2026-10-15, card license `cc-by-nc-2.0`), 83 files, 33,502,602,770 bytes (33.5 GB). Fetch and verify (SHA-256 per file) with `uv run --group prepare python train/prepare_agar.py`; the location is `COLONYCOUNT_AGAR_DIR` (default `<COLONYCOUNT_DATA_DIR>/agar`). Non-commercial use only, as above.
+Mirror used for download: Hugging Face dataset [`leodriesch/agar`](https://huggingface.co/datasets/leodriesch/agar), pinned to revision `9ce24ca6611a700b2c61d22946786630c65e7764` (last modified 2026-10-15, card license `cc-by-nc-2.0`), 83 files, 33,502,602,770 bytes (33.5 GB). Fetched over plain HTTP from that pinned revision with the Python standard library (no `huggingface_hub`, no Xet; the Xet transfer ran at about 46 kB/s where plain HTTP gave 7-10 MB/s) and verified (SHA-256 per file) with `uv run --group prepare python train/prepare_agar.py`; the location is `COLONYCOUNT_AGAR_DIR` (default `<COLONYCOUNT_DATA_DIR>/agar`). Non-commercial use only, as above.
 
 ## Models and their training data
 
