@@ -23,7 +23,6 @@ import hashlib
 from pathlib import Path
 
 from dotenv import load_dotenv
-from huggingface_hub import HfApi, snapshot_download
 
 from colonycount._env import env_path
 
@@ -43,6 +42,8 @@ def _digest(path: Path, algo: str) -> str:
 
 def expected_files() -> dict[str, tuple[int, str, str]]:
     """{path: (size, algo, hex digest)} for every file of the pinned revision."""
+    from huggingface_hub import HfApi  # prepare group only, not in CI
+
     tree = HfApi().list_repo_tree(
         REPO_ID, repo_type="dataset", revision=REVISION, recursive=True, expand=True
     )
@@ -84,6 +85,8 @@ def main(argv: list[str] | None = None) -> None:
     )
     root = agar_dir / "hf"
     if not args.verify_only:
+        from huggingface_hub import snapshot_download
+
         snapshot_download(REPO_ID, repo_type="dataset", revision=REVISION, local_dir=root)
     problems = verify(expected_files(), root)
     if problems:
