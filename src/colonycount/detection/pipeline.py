@@ -55,7 +55,7 @@ def count(
     the model's own default (0.5 for a local ONNX file);
     the tile size comes from the model, the tile overlap from ``COLONYCOUNT_TILE_OVERLAP``.
     """
-    model = model or env_str("COLONYCOUNT_MODEL", "public")
+    model = model or env_str("COLONYCOUNT_MODEL", "rfdetr-nano")
     if threshold is None:
         threshold = registry.threshold(model, model_path)
     img = load_image(image)

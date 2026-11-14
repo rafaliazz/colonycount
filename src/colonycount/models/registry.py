@@ -25,14 +25,15 @@ class Model:
 
 
 # Adding a model (e.g. `agar`, task 6.4) is one more entry here.
-# ponytail: `public` is a placeholder until task 5.2 publishes the weights and pins the checksum.
+# ponytail: `rfdetr-nano` is a placeholder until task 5.2 publishes the weights and pins the sha.
+# yolox-tiny (0.50) and yolox-m (0.45) are added with their entries at release task 1.2.
 # Thresholds are provisional (val sweep, results/benchmark/val/) until the plate-finder retune
 # (model-benchmark task 3.1) is re-scored; they are frozen before the one-time test run.
 MODELS = {
     m.name: m
     for m in [
         Model(
-            name="public",
+            name="rfdetr-nano",
             version="0.1.0",
             license="CC-BY-4.0",
             url="https://huggingface.co/rafali-azz/colonycount-public/resolve/v0.1.0/public.onnx",
