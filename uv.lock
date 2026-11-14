@@ -464,6 +464,7 @@ dev = [
     { name = "ruff" },
 ]
 prepare = [
+    { name = "huggingface-hub" },
     { name = "openpyxl" },
 ]
 yolox = [
@@ -496,7 +497,10 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
-prepare = [{ name = "openpyxl" }]
+prepare = [
+    { name = "huggingface-hub" },
+    { name = "openpyxl" },
+]
 yolox = [{ name = "pycocotools", specifier = "==2.0.11" }]
 
 [[package]]
