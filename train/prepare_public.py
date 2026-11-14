@@ -64,8 +64,8 @@ def _fetch(url: str, part: Path) -> None:
                 f.write(chunk)
 
 
-def download(url: str, dest: Path, md5: str, retries: int = 10) -> None:
-    """Resumable download to `dest`, verified against `md5`; no-op if already present."""
+def download(url: str, dest: Path, md5: str, retries: int = 10, digest=_md5) -> None:
+    """Resumable download to `dest`, verified (`digest(path) == md5`); no-op if present."""
     if dest.exists():
         return
     part = dest.with_name(dest.name + ".part")
@@ -79,7 +79,7 @@ def download(url: str, dest: Path, md5: str, retries: int = 10) -> None:
             time.sleep(10)
     else:
         raise RuntimeError(f"giving up on {dest.name}")
-    got = _md5(part)
+    got = digest(part)
     if got != md5:
         part.unlink()
         raise RuntimeError(f"md5 mismatch for {dest.name}: {got} != {md5}")
