@@ -53,6 +53,8 @@ To change some, copy it to `.env` (git-ignored) and edit only what you need; sec
 Precedence: CLI flag or function argument > environment variable > `.env` > default.
 `.env` is read from the working directory by the CLI and the `train/` scripts; the Python library (`colonycount.count`) reads only real environment variables.
 
+Each built-in model has its own default score threshold (`public`: 0.45, chosen on the validation split; provisional until the final retune), shown by `--list-models`. The threshold used is recorded in `counts.csv`. Precedence: `--threshold` > `COLONYCOUNT_THRESHOLD` > the model's default > 0.5 (a local `--model-path` ONNX file).
+
 Main variables: `COLONYCOUNT_MODEL`, `COLONYCOUNT_MODEL_PATH`, `COLONYCOUNT_THRESHOLD`, `COLONYCOUNT_COUNTABLE_RANGE`, `COLONYCOUNT_TILE_OVERLAP`, `COLONYCOUNT_CACHE_DIR`, `COLONYCOUNT_DATA_DIR`, and the training ones (`COLONYCOUNT_TRAIN_TILE_SIZE`, `COLONYCOUNT_TRAIN_EPOCHS`, `COLONYCOUNT_SEED`, ...).
 The inference tile size is not a setting: it is read from the ONNX model's input shape (`images` `[1, 3, T, T]`), and the model is checked against its contract when it loads.
 

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import platformdirs
 
-from colonycount._env import env_path
+from colonycount._env import env_float, env_path
 
 
 @dataclass(frozen=True)
@@ -21,10 +21,13 @@ class Model:
     license: str
     url: str
     sha256: str | None  # None = not published yet
+    threshold: float  # default score threshold, chosen on val
 
 
 # Adding a model (e.g. `agar`, task 6.4) is one more entry here.
 # ponytail: `public` is a placeholder until task 5.2 publishes the weights and pins the checksum.
+# Thresholds are provisional (val sweep, results/benchmark/val/) until the plate-finder retune
+# (model-benchmark task 3.1) is re-scored; they are frozen before the one-time test run.
 MODELS = {
     m.name: m
     for m in [
@@ -34,6 +37,7 @@ MODELS = {
             license="CC-BY-4.0",
             url="https://huggingface.co/rafali-azz/colonycount-public/resolve/v0.1.0/public.onnx",
             sha256=None,
+            threshold=0.45,
         ),
     ]
 }
@@ -46,6 +50,17 @@ def get(name: str) -> Model:
         raise ValueError(
             f"unknown model {name!r}; available models: {', '.join(sorted(MODELS))}"
         ) from None
+
+
+def threshold(name: str, model_path: str | os.PathLike | None = None) -> float:
+    """Score threshold: ``COLONYCOUNT_THRESHOLD``, else the model's default, else 0.5.
+
+    A local ONNX file (``model_path`` or ``COLONYCOUNT_MODEL_PATH``) is not a registry model, so it
+    gets the global 0.5.
+    """
+    local = model_path or env_path("COLONYCOUNT_MODEL_PATH", None)
+    env = env_float("COLONYCOUNT_THRESHOLD", None, 0, 1)
+    return env if env is not None else 0.5 if local else get(name).threshold
 
 
 def resolve(name: str, model_path: str | os.PathLike | None = None) -> tuple[Path, str]:

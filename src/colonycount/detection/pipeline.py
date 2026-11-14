@@ -14,7 +14,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from colonycount._env import env_float, env_int, env_str
+from colonycount._env import env_int, env_str
 from colonycount.detection.plate import find_plate
 from colonycount.detection.runner import load_session, tile_size
 from colonycount.detection.tiling import detect_tiled, nms
@@ -51,13 +51,13 @@ def count(
 ) -> Result:
     """Count colonies in a plate photo (path or HxW / HxWx3 RGB array).
 
-    ``threshold`` and ``model`` default to ``COLONYCOUNT_THRESHOLD`` / ``COLONYCOUNT_MODEL``;
+    ``model`` defaults to ``COLONYCOUNT_MODEL``; ``threshold`` to ``COLONYCOUNT_THRESHOLD``, else
+    the model's own default (0.5 for a local ONNX file);
     the tile size comes from the model, the tile overlap from ``COLONYCOUNT_TILE_OVERLAP``.
     """
-    if threshold is None:
-        # ponytail: 0.5 is a placeholder until tasks 2.3/2.5 fix it.
-        threshold = env_float("COLONYCOUNT_THRESHOLD", 0.5, 0, 1)
     model = model or env_str("COLONYCOUNT_MODEL", "public")
+    if threshold is None:
+        threshold = registry.threshold(model, model_path)
     img = load_image(image)
     path, version = registry.resolve(model, model_path)
     session = load_session(str(path))
