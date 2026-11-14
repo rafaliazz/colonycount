@@ -42,7 +42,7 @@ def test_precedence_flag_env_dotenv_default(tmp_path, monkeypatch, local_model):
     row = run()
     assert row["threshold"] == "0.7"  # .env beats the default
     assert row["range_flag"] == "TFTC"  # real env (50,300) beats .env (1,2)
-    assert row["model"] == "public"  # default
+    assert row["model"] == "rfdetr-nano"  # default
     assert run("--threshold", "0.6")["threshold"] == "0.6"  # flag beats .env
     assert colonycount.count(img, threshold=0.9).threshold == 0.9  # argument beats env
 

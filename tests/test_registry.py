@@ -26,7 +26,7 @@ def published(model_file, monkeypatch, tmp_path):
         registry,
         "MODELS",
         {
-            "public": registry.Model("public", "9.9", "CC-BY-4.0", url, sha, 0.45),
+            "rfdetr-nano": registry.Model("rfdetr-nano", "9.9", "CC-BY-4.0", url, sha, 0.45),
             "agar": registry.Model("agar", "2.0", "CC-BY-NC-2.0", url, sha, 0.3),
         },
     )
@@ -42,15 +42,16 @@ def published(model_file, monkeypatch, tmp_path):
 
 
 def test_first_run_downloads_verifies_and_caches(published, tmp_path):
-    path, version = registry.resolve("public")
+    path, version = registry.resolve("rfdetr-nano")
     assert path.parent == tmp_path / "cache" and version == "9.9"
-    assert registry.resolve("public")[0] == path
+    assert path.name == "rfdetr-nano-9.9.onnx"
+    assert registry.resolve("rfdetr-nano")[0] == path
     assert len(published) == 1  # downloaded once
     assert colonycount.count(make_plate()[0]).model_version == "9.9"
 
 
 def test_no_network_with_cache(published, monkeypatch):
-    registry.resolve("public")
+    registry.resolve("rfdetr-nano")
     monkeypatch.setattr(urllib.request, "urlopen", offline)
     img, truth = make_plate()
     assert colonycount.count(img).total == len(truth)
@@ -58,17 +59,17 @@ def test_no_network_with_cache(published, monkeypatch):
 
 def test_no_network_without_cache(published, monkeypatch):
     monkeypatch.setattr(urllib.request, "urlopen", offline)
-    with pytest.raises(RuntimeError, match="could not download model 'public'"):
-        registry.resolve("public")
+    with pytest.raises(RuntimeError, match="could not download model 'rfdetr-nano'"):
+        registry.resolve("rfdetr-nano")
 
 
 def test_checksum_mismatch(published, monkeypatch, tmp_path):
-    m = registry.MODELS["public"]
+    m = registry.MODELS["rfdetr-nano"]
     monkeypatch.setitem(
-        registry.MODELS, "public", registry.Model(**{**vars(m), "sha256": "0" * 64})
+        registry.MODELS, "rfdetr-nano", registry.Model(**{**vars(m), "sha256": "0" * 64})
     )
     with pytest.raises(RuntimeError, match="checksum mismatch"):
-        registry.resolve("public")
+        registry.resolve("rfdetr-nano")
     assert not any((tmp_path / "cache").iterdir())  # nothing unverified left in the cache
 
 
@@ -78,21 +79,21 @@ def test_choose_model(published):
 
 
 def test_unknown_model(local_model):
-    with pytest.raises(ValueError, match="'nope'.*available models: public"):
+    with pytest.raises(ValueError, match="'nope'.*available models: rfdetr-nano"):
         colonycount.count(make_plate()[0], model="nope")
 
 
 def test_unpublished_model_points_to_local_override(monkeypatch):
     monkeypatch.delenv("COLONYCOUNT_MODEL_PATH", raising=False)
     with pytest.raises(RuntimeError, match="not published yet.*COLONYCOUNT_MODEL_PATH"):
-        registry.resolve("public")
+        registry.resolve("rfdetr-nano")
 
 
 def test_local_override(model_file, local_model, tmp_path):
-    assert registry.resolve("public") == (model_file, "local")
-    assert registry.resolve("public", model_path=model_file) == (model_file, "local")
+    assert registry.resolve("rfdetr-nano") == (model_file, "local")
+    assert registry.resolve("rfdetr-nano", model_path=model_file) == (model_file, "local")
     with pytest.raises(FileNotFoundError, match="nothing.onnx"):
-        registry.resolve("public", model_path=tmp_path / "nothing.onnx")
+        registry.resolve("rfdetr-nano", model_path=tmp_path / "nothing.onnx")
 
 
 def test_threshold_precedence(published, monkeypatch):

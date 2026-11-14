@@ -39,7 +39,7 @@ def test_typical_plate(fmt, tmp_path, local_model):
     assert all(r.threshold <= d.confidence <= 1 for d in r.detections)
     assert all(6 <= d.diameter <= 10 for d in r.detections)
     assert matched(r, truth)
-    assert (r.model, r.model_version) == ("public", "local")
+    assert (r.model, r.model_version) == ("rfdetr-nano", "local")
 
 
 def test_unsupported_input(tmp_path, local_model):

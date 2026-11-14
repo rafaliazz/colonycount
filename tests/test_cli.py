@@ -38,7 +38,7 @@ def test_folder_of_plates(plates, tmp_path):
     for r in rows.values():
         assert r["count"] == "40" and r["plate_found"] == "True" and r["range_flag"] == "OK"
         assert float(r["cfu_per_ml"]) == pytest.approx(40 / 1e-5)
-        assert (r["model"], r["model_version"]) == ("public", "local")
+        assert (r["model"], r["model_version"]) == ("rfdetr-nano", "local")
         assert r["threshold"] == "0.5" and r["package_version"] == colonycount.__version__
         assert r["error"] == ""
 
@@ -74,7 +74,7 @@ def test_range_and_threshold_options(plates, tmp_path):
 
 def test_list_models(capsys):
     assert main(["--list-models"]) == 0
-    assert "public\t0.1.0\tCC-BY-4.0" in capsys.readouterr().out
+    assert "rfdetr-nano\t0.1.0\tCC-BY-4.0" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize(

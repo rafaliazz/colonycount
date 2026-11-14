@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         p.error("no images given")
     want_cfu = args.dilution is not None or args.volume is not None
     try:
-        args.model = args.model or env_str("COLONYCOUNT_MODEL", "public")
+        args.model = args.model or env_str("COLONYCOUNT_MODEL", "rfdetr-nano")
         registry.get(args.model)
         if args.threshold is None:
             args.threshold = registry.threshold(args.model, args.model_path)
