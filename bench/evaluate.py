@@ -20,6 +20,7 @@ for the final model choice and needs --allow-test. Writes <out>/<split>[-noplate
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import statistics
 import time
@@ -33,9 +34,11 @@ from colonycount._env import env_path
 from colonycount.detection import pipeline
 from colonycount.detection.pipeline import count, load_image
 from colonycount.detection.plate import find_plate
+from colonycount.detection.tiling import detect_tiled
 
 THRESHOLDS = [round(0.2 + 0.05 * i, 2) for i in range(13)]  # 0.20 .. 0.80
 RANGE = (30, 300)
+MIN_SCORE = 0.05  # raw detections below this are not cached
 BUCKETS = {"<30": (0, 29), "30-300": RANGE, ">300": (301, float("inf"))}
 
 
@@ -192,17 +195,27 @@ def run(
     for im, boxes in items:
         img = load_image(data_dir / im["file_name"])
         gt_xy = boxes[:, :2] + boxes[:, 2:] / 2
-        circle = None if no_plate else find_plate(img)
+        found = find_plate(img)
+        circle = None if no_plate else found
         outside = 0
         if circle:
             outside = int((np.hypot(*(gt_xy - circle[:2]).T) > circle[2]).sum())
+        raw = {}
+
+        def grab(*a, raw=raw, **k):
+            raw["boxes"], raw["scores"] = out = detect_tiled(*a, **k)
+            return out
+
         t0 = time.perf_counter()
-        if no_plate:
-            with mock.patch.object(pipeline, "find_plate", return_value=None):
+        # count() shifts the boxes to full-image pixels in place, so raw["boxes"] ends up there.
+        with mock.patch.object(pipeline, "detect_tiled", grab):
+            if no_plate:
+                with mock.patch.object(pipeline, "find_plate", return_value=None):
+                    res = count(img, model_path=model, threshold=THRESHOLDS[0])
+            else:
                 res = count(img, model_path=model, threshold=THRESHOLDS[0])
-        else:
-            res = count(img, model_path=model, threshold=THRESHOLDS[0])
         seconds.append(time.perf_counter() - t0)
+        hi = raw["scores"] >= MIN_SCORE
         plates.append(
             {
                 "file": im["file_name"],
@@ -214,6 +227,10 @@ def run(
                 "plate_found": res.plate_found,
                 "conf": [d.confidence for d in res.detections],
                 "xy": [(d.x, d.y) for d in res.detections],
+                "raw": (raw["boxes"][hi], raw["scores"][hi]),
+                "found": found,
+                "size": img.shape[:2],
+                "gt_boxes": boxes,
             }
         )
         print(
@@ -222,6 +239,28 @@ def run(
             flush=True,
         )
     return plates, seconds
+
+
+def save_detections(path: Path, plates, seconds, model: Path, split: str, no_plate: bool) -> None:
+    """Raw detections per plate (post seam ownership, pre threshold/plate/NMS) for rescore.py."""
+    np.savez_compressed(
+        path,
+        model=model.name,
+        sha256=hashlib.sha256(model.read_bytes()).hexdigest(),
+        split=split,
+        no_plate=no_plate,
+        min_score=MIN_SCORE,
+        names=[p["file"] for p in plates],
+        source=[p["source"] for p in plates],
+        seconds=seconds,
+        size=[p["size"] for p in plates],
+        circle=[p["found"] or (np.nan,) * 3 for p in plates],  # what the finder returned
+        boxes=np.concatenate([p["raw"][0] for p in plates]),
+        scores=np.concatenate([p["raw"][1] for p in plates]),
+        raw_offsets=np.cumsum([0, *(len(p["raw"][1]) for p in plates)]),
+        gt_boxes=np.concatenate([p["gt_boxes"] for p in plates]),
+        gt_offsets=np.cumsum([0, *(len(p["gt_boxes"]) for p in plates)]),
+    )
 
 
 def main() -> None:
@@ -233,6 +272,7 @@ def main() -> None:
     ap.add_argument("--no-plate", action="store_true", help="count the whole image, no plate crop")
     ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
     ap.add_argument("--out", type=Path, help="default: <data dir>/bench")
+    ap.add_argument("--save-detections", action="store_true", help="also write <stem>.npz")
     ap.add_argument("--limit", type=int, help="only N evenly spaced plates (smoke runs)")
     args = ap.parse_args()
     if args.split == "test" and not args.allow_test:
@@ -245,6 +285,10 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     stem = args.out / (args.split + ("-noplate" if args.no_plate else ""))
     stem.with_suffix(".json").write_text(json.dumps(rep, indent=1) + "\n")
+    if args.save_detections:
+        save_detections(
+            stem.with_suffix(".npz"), plates, seconds, args.model, args.split, args.no_plate
+        )
     md = markdown(rep, seconds)
     stem.with_suffix(".md").write_text(md)
     print(md)

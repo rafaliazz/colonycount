@@ -37,3 +37,27 @@ def test_summarize_thresholds_and_buckets():
     assert (lo["bias"], lo["precision"], lo["recall"]) == (1, pytest.approx(2 / 3, abs=1e-4), 1)
     assert (hi["mae"], hi["precision"], hi["recall"]) == (0, 1, 1)
     assert hi["n_30_300"] == 0 and hi["mdape_30_300"] is None and hi["mdape_all"] == 0
+
+
+def test_rescore_matches_evaluate_on_a_synthetic_cache(tmp_path):
+    import rescore
+
+    gt = np.array([[-2.0, -2.0, 4.0, 4.0], [8.0, -2.0, 4.0, 4.0]])  # xywh, centres (0,0), (10,0)
+    # two overlapping boxes on colony 0 (NMS keeps the better), one on colony 1, one low-score,
+    # one far outside the plate circle
+    boxes = np.array(
+        [[-2, -2, 2, 2], [-2.2, -2, 2, 2], [8, -2, 12, 2], [30, 30, 34, 34], [100, 100, 104, 104]]
+    )
+    scores = np.array([0.9, 0.8, 0.7, 0.3, 0.9])
+    plate = {"file": "a.jpg", "source": "s", "gt_boxes": gt, "raw": (boxes, scores)}
+    plate |= {"found": (5.0, 0.0, 60.0), "size": (200, 200)}
+    (tmp_path / "m.onnx").write_bytes(b"x")
+    evaluate.save_detections(tmp_path / "c.npz", [plate], [1.0], tmp_path / "m.onnx", "val", False)
+    head, raw = rescore.load(tmp_path / "c.npz")
+    got = evaluate.report(rescore.rescore(raw, 0.2, True), "val", False, head["model"])
+    # what evaluate.run builds after count(): NMS-merged, plate-restricted detections >= 0.2
+    live = {k: plate[k] for k in ("file", "source")} | {"gt": 2, "gt_outside": 0}
+    live |= {"gt_xy": gt[:, :2] + gt[:, 2:] / 2, "gt_r": np.array([2.0, 2.0])}
+    live |= {"plate_found": True, "conf": [0.9, 0.7, 0.3]}
+    live["xy"] = [(0.0, 0.0), (10.0, 0.0), (32.0, 32.0)]
+    assert got == evaluate.report([live], "val", False, "m.onnx")
