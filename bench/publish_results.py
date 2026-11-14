@@ -54,14 +54,14 @@ LABELS = {  # comparison.md row labels, in this order; compare.py appends (crop)
     "yolox-m-noplate": "YOLOX-M",
     "opencfu-noplate": "OpenCFU",
 }
-# base name -> (shipped in v0.1, license, parameters); the JSONs hold neither (parameters: the
-# models' published sizes, hand-kept)
+# base name -> (shipped in v0.1, license, parameters); the JSONs hold neither (parameters:
+# counted from each exported ONNX file's weight tensors, 2026-11-15)
 INFO = {
-    "rfdetr-nano": (True, "Apache-2.0", "30 M"),
-    "yolox-tiny": (True, "Apache-2.0", "5 M"),
-    "yolox-m": (True, "Apache-2.0", "25 M"),
-    "yolov8n": (False, "AGPL-3.0", "3 M"),
-    "yolov8m": (False, "AGPL-3.0", "26 M"),
+    "rfdetr-nano": (True, "Apache-2.0", "27.2 M"),
+    "yolox-tiny": (True, "Apache-2.0", "5.0 M"),
+    "yolox-m": (True, "Apache-2.0", "25.3 M"),
+    "yolov8n": (False, "AGPL-3.0", "3.1 M"),
+    "yolov8m": (False, "AGPL-3.0", "25.8 M"),
     "opencfu": (False, "GPL-3.0 (tool)", "-"),
 }
 MODES = [("", "crop"), ("-noplate", "whole image")]  # first = the library default (crop)

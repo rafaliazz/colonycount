@@ -20,11 +20,11 @@ All plates. MdAPE is on plates with 30-300 true colonies; bias is predicted minu
 
 | model | MdAPE (30-300) | MAE | bias | precision | recall | CPU s/plate | threshold | license | params |
 |---|---|---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 2.20% | 5.8 | -1.2 | 96.6% | 95.4% | 14.3 | 0.45 | Apache-2.0 | 30 M |
-| **YOLOX-Tiny** (ships) | 2.72% | 6.2 | -1.5 | 96.3% | 94.8% | 2.4 | 0.5 | Apache-2.0 | 5 M |
-| **YOLOX-M** (ships) | 2.64% | 7.2 | -2.5 | 96.3% | 93.8% | 4.3 | 0.45 | Apache-2.0 | 25 M |
-| YOLOv8-n | 2.38% | 7.8 | +0.4 | 94.5% | 95.0% | 1.0 | 0.3 | AGPL-3.0 | 3 M |
-| YOLOv8-m | 2.23% | 7.9 | -0.7 | 95.1% | 94.4% | 9.5 | 0.3 | AGPL-3.0 | 26 M |
+| **RF-DETR-nano** (ships) | 2.20% | 5.8 | -1.2 | 96.6% | 95.4% | 14.3 | 0.45 | Apache-2.0 | 27.2 M |
+| **YOLOX-Tiny** (ships) | 2.72% | 6.2 | -1.5 | 96.3% | 94.8% | 2.4 | 0.5 | Apache-2.0 | 5.0 M |
+| **YOLOX-M** (ships) | 2.64% | 7.2 | -2.5 | 96.3% | 93.8% | 4.3 | 0.45 | Apache-2.0 | 25.3 M |
+| YOLOv8-n | 2.38% | 7.8 | +0.4 | 94.5% | 95.0% | 1.0 | 0.3 | AGPL-3.0 | 3.1 M |
+| YOLOv8-m | 2.23% | 7.9 | -0.7 | 95.1% | 94.4% | 9.5 | 0.3 | AGPL-3.0 | 25.8 M |
 | OpenCFU | 9.99% | 23.2 | -9.5 | 82.5% | 74.3% | 0.6 | - | GPL-3.0 (tool) | - |
 
 Counting defaults to the plate crop: `colonycount.count` finds the plate rim and counts inside it. On this split counting the whole image was more accurate for every shipped model (next table), but the crop is listed first because it is the default.
@@ -35,11 +35,11 @@ All plates. MdAPE is on plates with 30-300 true colonies; bias is predicted minu
 
 | model | MdAPE (30-300) | MAE | bias | precision | recall | CPU s/plate | threshold | license | params |
 |---|---|---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 1.43% | 5.0 | +0.6 | 96.2% | 96.8% | 24.5 | 0.45 | Apache-2.0 | 30 M |
-| **YOLOX-Tiny** (ships) | 1.43% | 5.6 | +0.2 | 95.9% | 96.1% | 4.0 | 0.5 | Apache-2.0 | 5 M |
-| **YOLOX-M** (ships) | 1.56% | 6.6 | -0.8 | 95.9% | 95.1% | 7.2 | 0.45 | Apache-2.0 | 25 M |
-| YOLOv8-n | 1.56% | 8.6 | +0.9 | 94.1% | 95.0% | 1.8 | 0.35 | AGPL-3.0 | 3 M |
-| YOLOv8-m | 1.44% | 9.2 | -0.8 | 94.6% | 93.8% | 8.2 | 0.35 | AGPL-3.0 | 26 M |
+| **RF-DETR-nano** (ships) | 1.43% | 5.0 | +0.6 | 96.2% | 96.8% | 24.5 | 0.45 | Apache-2.0 | 27.2 M |
+| **YOLOX-Tiny** (ships) | 1.43% | 5.6 | +0.2 | 95.9% | 96.1% | 4.0 | 0.5 | Apache-2.0 | 5.0 M |
+| **YOLOX-M** (ships) | 1.56% | 6.6 | -0.8 | 95.9% | 95.1% | 7.2 | 0.45 | Apache-2.0 | 25.3 M |
+| YOLOv8-n | 1.56% | 8.6 | +0.9 | 94.1% | 95.0% | 1.8 | 0.35 | AGPL-3.0 | 3.1 M |
+| YOLOv8-m | 1.44% | 9.2 | -0.8 | 94.6% | 93.8% | 8.2 | 0.35 | AGPL-3.0 | 25.8 M |
 | OpenCFU | 8.66% | 22.7 | -9.8 | 84.7% | 76.0% | 0.5 | - | GPL-3.0 (tool) | - |
 
 ## By source
