@@ -6,7 +6,22 @@ Status: pre-alpha.
 
 Datasets, licenses and attribution: see [DATA.md](DATA.md).
 
-Benchmark results (val split, colonycount vs OpenCFU): [results/benchmark/val/comparison.md](results/benchmark/val/comparison.md).
+## Model results
+
+<!-- results:begin -->
+On the val split, plate crop on (the default). MdAPE is the median error of the plate count on plates with 30-300 colonies, MAE the mean error in colonies per plate, and CPU time is the median per plate:
+
+| model | MdAPE (30-300) | MAE | CPU s/plate | license |
+|---|---|---|---|---|
+| **RF-DETR-nano** (ships) | 2.20% | 5.8 | 14.3 | Apache-2.0 |
+| **YOLOX-Tiny** (ships) | 2.72% | 6.2 | 2.4 | Apache-2.0 |
+| **YOLOX-M** (ships) | 2.64% | 7.2 | 4.3 | Apache-2.0 |
+| OpenCFU | 9.99% | 23.2 | 0.6 | GPL-3.0 (tool) |
+
+These are val-split numbers, slightly optimistic because the thresholds were chosen on it. Full report: [results/README.md](results/README.md).
+<!-- results:end -->
+
+All per-method tables: [results/benchmark/val/comparison.md](results/benchmark/val/comparison.md).
 
 ## Quickstart
 

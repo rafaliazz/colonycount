@@ -36,3 +36,15 @@ def test_relative_rewrites_paths_under_root_and_rejects_others(tmp_path):
     }
     with pytest.raises(ValueError):
         publish_results.relative(r"C:\elsewhere\x.jpg", tmp_path.resolve())
+
+
+def test_readmes_are_regenerated_and_match_the_json():
+    root = Path(__file__).parent.parent
+    folder = RESULTS / "val"
+    full, short = (root / "results" / "README.md"), (root / "README.md")
+    block = publish_results.report(folder)
+    assert publish_results.splice(full.read_text(), block) == full.read_text()
+    block = publish_results.readme_summary(folder, "results/README.md")
+    assert publish_results.splice(short.read_text(), block) == short.read_text()
+    mdape = json.loads((folder / "rfdetr-nano.json").read_text())["by_source"]["overall"]
+    assert f"| **RF-DETR-nano** (ships) | {mdape['mdape_30_300']:.2f}% |" in short.read_text()
