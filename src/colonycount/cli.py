@@ -10,7 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 import colonycount
-from colonycount._env import env_float, env_str
+from colonycount._env import env_str
 from colonycount.detection.pipeline import count
 from colonycount.models import registry
 from colonycount.utils import cfu
@@ -35,7 +35,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("images", nargs="*", help="image files or glob patterns (e.g. plates/*.jpg)")
     p.add_argument("--dilution", type=float, help="dilution factor of the plated sample, e.g. 1e-4")
     p.add_argument("--volume", type=float, help="plated volume in mL, e.g. 0.1")
-    p.add_argument("--threshold", type=float, help="score threshold (COLONYCOUNT_THRESHOLD)")
+    p.add_argument(
+        "--threshold",
+        type=float,
+        help="score threshold (COLONYCOUNT_THRESHOLD; default: the model's own)",
+    )
     p.add_argument("--model", help="built-in model name, see --list-models (COLONYCOUNT_MODEL)")
     p.add_argument(
         "--model-path", help="local ONNX file instead of a built-in model (COLONYCOUNT_MODEL_PATH)"
@@ -63,10 +67,10 @@ def main(argv: list[str] | None = None) -> int:
         p.error("no images given")
     want_cfu = args.dilution is not None or args.volume is not None
     try:
-        if args.threshold is None:
-            args.threshold = env_float("COLONYCOUNT_THRESHOLD", 0.5, 0, 1)
         args.model = args.model or env_str("COLONYCOUNT_MODEL", "public")
         registry.get(args.model)
+        if args.threshold is None:
+            args.threshold = registry.threshold(args.model, args.model_path)
         cfu.range_flag(0, *args.range)
         if want_cfu:
             cfu.cfu_per_ml(0, args.dilution, args.volume)

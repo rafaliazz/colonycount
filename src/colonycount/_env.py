@@ -34,7 +34,9 @@ def env_int(name: str, default: int, lo: int | None = None) -> int:
     return _read(name, default, lambda s: _in_range(int(s), lo, None))
 
 
-def env_float(name: str, default: float, lo: float | None = None, hi: float | None = None) -> float:
+def env_float(
+    name: str, default: float | None, lo: float | None = None, hi: float | None = None
+) -> float | None:
     return _read(name, default, lambda s: _in_range(float(s), lo, hi))
 
 

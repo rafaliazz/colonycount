@@ -26,8 +26,8 @@ def published(model_file, monkeypatch, tmp_path):
         registry,
         "MODELS",
         {
-            "public": registry.Model("public", "9.9", "CC-BY-4.0", url, sha),
-            "agar": registry.Model("agar", "2.0", "CC-BY-NC-2.0", url, sha),
+            "public": registry.Model("public", "9.9", "CC-BY-4.0", url, sha, 0.45),
+            "agar": registry.Model("agar", "2.0", "CC-BY-NC-2.0", url, sha, 0.3),
         },
     )
     calls = []
@@ -93,3 +93,11 @@ def test_local_override(model_file, local_model, tmp_path):
     assert registry.resolve("public", model_path=model_file) == (model_file, "local")
     with pytest.raises(FileNotFoundError, match="nothing.onnx"):
         registry.resolve("public", model_path=tmp_path / "nothing.onnx")
+
+
+def test_threshold_precedence(published, monkeypatch):
+    monkeypatch.delenv("COLONYCOUNT_THRESHOLD", raising=False)
+    assert registry.threshold("agar") == 0.3  # the model's own default
+    assert registry.threshold("agar", "x.onnx") == 0.5  # local ONNX file: global default
+    monkeypatch.setenv("COLONYCOUNT_THRESHOLD", "0.8")
+    assert registry.threshold("agar") == 0.8  # env var beats the registry
