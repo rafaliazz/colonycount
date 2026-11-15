@@ -4,38 +4,39 @@
  "plate_restriction": false,
  "match_radius": "0.5 x mean GT box side, around the GT box centre",
  "threshold": 0.45,
+ "threshold_source": "val-sweep",
  "by_source": {
   "clinical": {
    "n": 142,
-   "mae": 3.12,
-   "bias": 2.894,
-   "mdape_30_300": 1.671,
+   "mae": 1.704,
+   "bias": 1.408,
+   "mdape_30_300": 0.824,
    "n_30_300": 100,
-   "mdape_all": 2.053,
-   "precision": 0.9513,
-   "recall": 0.9924,
+   "mdape_all": 0.746,
+   "precision": 0.9714,
+   "recall": 0.9918,
    "plate_found": 0.0
   },
   "smartphone": {
    "n": 56,
-   "mae": 15.393,
-   "bias": -10.143,
+   "mae": 15.411,
+   "bias": -10.554,
    "mdape_30_300": 1.44,
    "n_30_300": 40,
-   "mdape_all": 2.115,
-   "precision": 0.9676,
-   "recall": 0.9086,
+   "mdape_all": 2.16,
+   "precision": 0.97,
+   "recall": 0.9084,
    "plate_found": 0.0
   },
   "overall": {
    "n": 198,
-   "mae": 6.591,
-   "bias": -0.793,
-   "mdape_30_300": 1.556,
+   "mae": 5.581,
+   "bias": -1.975,
+   "mdape_30_300": 1.115,
    "n_30_300": 140,
-   "mdape_all": 2.094,
-   "precision": 0.959,
-   "recall": 0.951,
+   "mdape_all": 1.292,
+   "precision": 0.9707,
+   "recall": 0.9505,
    "plate_found": 0.0
   }
  },
@@ -43,34 +44,34 @@
   "clinical": {
    "<30": {
     "n": 40,
-    "mae": 2.6,
-    "bias": 2.55,
+    "mae": 1.375,
+    "bias": 1.325,
     "mdape_30_300": null,
     "n_30_300": 0,
-    "mdape_all": 10.819,
-    "precision": 0.8667,
+    "mdape_all": 0.0,
+    "precision": 0.9209,
     "recall": 0.9877,
     "plate_found": 0.0
    },
    "30-300": {
     "n": 100,
-    "mae": 3.35,
-    "bias": 3.05,
-    "mdape_30_300": 1.671,
+    "mae": 1.85,
+    "bias": 1.45,
+    "mdape_30_300": 0.824,
     "n_30_300": 100,
-    "mdape_all": 1.671,
-    "precision": 0.9567,
-    "recall": 0.993,
+    "mdape_all": 0.824,
+    "precision": 0.9747,
+    "recall": 0.9923,
     "plate_found": 0.0
    },
    ">300": {
     "n": 2,
-    "mae": 2.0,
-    "bias": 2.0,
+    "mae": 1.0,
+    "bias": 1.0,
     "mdape_30_300": null,
     "n_30_300": 0,
-    "mdape_all": 0.506,
-    "precision": 0.9854,
+    "mdape_all": 0.275,
+    "precision": 0.988,
     "recall": 0.9906,
     "plate_found": 0.0
    }
@@ -89,59 +90,59 @@
    },
    "30-300": {
     "n": 40,
-    "mae": 9.275,
-    "bias": -7.075,
+    "mae": 9.4,
+    "bias": -7.55,
     "mdape_30_300": 1.44,
     "n_30_300": 40,
     "mdape_all": 1.44,
-    "precision": 0.9748,
-    "recall": 0.9215,
+    "precision": 0.9784,
+    "recall": 0.9213,
     "plate_found": 0.0
    },
    ">300": {
     "n": 10,
-    "mae": 47.7,
-    "bias": -28.1,
+    "mae": 47.3,
+    "bias": -28.5,
     "mdape_30_300": null,
     "n_30_300": 0,
-    "mdape_all": 4.799,
-    "precision": 0.9603,
-    "recall": 0.8947,
+    "mdape_all": 4.693,
+    "precision": 0.9611,
+    "recall": 0.8945,
     "plate_found": 0.0
    }
   },
   "all": {
    "<30": {
     "n": 46,
-    "mae": 2.565,
-    "bias": 2.13,
+    "mae": 1.5,
+    "bias": 1.065,
     "mdape_30_300": null,
     "n_30_300": 0,
-    "mdape_all": 11.111,
-    "precision": 0.8611,
+    "mdape_all": 2.083,
+    "precision": 0.9134,
     "recall": 0.9723,
     "plate_found": 0.0
    },
    "30-300": {
     "n": 140,
-    "mae": 5.043,
-    "bias": 0.157,
-    "mdape_30_300": 1.556,
+    "mae": 4.007,
+    "bias": -1.121,
+    "mdape_30_300": 1.115,
     "n_30_300": 140,
-    "mdape_all": 1.556,
-    "precision": 0.9634,
-    "recall": 0.965,
+    "mdape_all": 1.115,
+    "precision": 0.9761,
+    "recall": 0.9645,
     "plate_found": 0.0
    },
    ">300": {
     "n": 12,
-    "mae": 40.083,
-    "bias": -23.083,
+    "mae": 39.583,
+    "bias": -23.583,
     "mdape_30_300": null,
     "n_30_300": 0,
-    "mdape_all": 4.016,
-    "precision": 0.9644,
-    "recall": 0.9094,
+    "mdape_all": 3.912,
+    "precision": 0.9655,
+    "recall": 0.9092,
     "plate_found": 0.0
    }
   }
@@ -149,145 +150,145 @@
  "threshold_curve": {
   "0.2": {
    "n": 198,
-   "mae": 5.949,
-   "bias": 3.636,
-   "mdape_30_300": 2.18,
+   "mae": 4.682,
+   "bias": 2.035,
+   "mdape_30_300": 1.477,
    "n_30_300": 140,
-   "mdape_all": 2.778,
-   "precision": 0.9444,
-   "recall": 0.9806,
+   "mdape_all": 2.083,
+   "precision": 0.9592,
+   "recall": 0.9797,
    "plate_found": 0.0
   },
   "0.25": {
    "n": 198,
-   "mae": 5.838,
-   "bias": 2.798,
-   "mdape_30_300": 2.102,
+   "mae": 4.606,
+   "bias": 1.313,
+   "mdape_30_300": 1.375,
    "n_30_300": 140,
-   "mdape_all": 2.426,
-   "precision": 0.9489,
-   "recall": 0.9768,
+   "mdape_all": 1.455,
+   "precision": 0.9627,
+   "recall": 0.976,
    "plate_found": 0.0
   },
   "0.3": {
    "n": 198,
-   "mae": 5.904,
-   "bias": 1.975,
-   "mdape_30_300": 2.02,
+   "mae": 4.722,
+   "bias": 0.611,
+   "mdape_30_300": 1.266,
    "n_30_300": 140,
-   "mdape_all": 2.291,
-   "precision": 0.9522,
-   "recall": 0.972,
+   "mdape_all": 1.392,
+   "precision": 0.9651,
+   "recall": 0.9713,
    "plate_found": 0.0
   },
   "0.35": {
    "n": 198,
-   "mae": 5.97,
-   "bias": 1.202,
-   "mdape_30_300": 1.671,
+   "mae": 4.869,
+   "bias": -0.081,
+   "mdape_30_300": 1.19,
    "n_30_300": 140,
-   "mdape_all": 2.223,
-   "precision": 0.9547,
-   "recall": 0.9668,
+   "mdape_all": 1.308,
+   "precision": 0.967,
+   "recall": 0.9662,
    "plate_found": 0.0
   },
   "0.4": {
    "n": 198,
-   "mae": 6.278,
-   "bias": 0.278,
-   "mdape_30_300": 1.671,
+   "mae": 5.202,
+   "bias": -0.949,
+   "mdape_30_300": 1.292,
    "n_30_300": 140,
-   "mdape_all": 2.198,
-   "precision": 0.9566,
-   "recall": 0.9594,
+   "mdape_all": 1.375,
+   "precision": 0.9686,
+   "recall": 0.9589,
    "plate_found": 0.0
   },
   "0.45": {
    "n": 198,
-   "mae": 6.591,
-   "bias": -0.793,
-   "mdape_30_300": 1.556,
+   "mae": 5.581,
+   "bias": -1.975,
+   "mdape_30_300": 1.115,
    "n_30_300": 140,
-   "mdape_all": 2.094,
-   "precision": 0.959,
-   "recall": 0.951,
+   "mdape_all": 1.292,
+   "precision": 0.9707,
+   "recall": 0.9505,
    "plate_found": 0.0
   },
   "0.5": {
    "n": 198,
-   "mae": 7.348,
-   "bias": -2.005,
-   "mdape_30_300": 1.601,
+   "mae": 6.384,
+   "bias": -3.162,
+   "mdape_30_300": 1.258,
    "n_30_300": 140,
-   "mdape_all": 2.094,
-   "precision": 0.9616,
-   "recall": 0.9413,
+   "mdape_all": 1.361,
+   "precision": 0.9733,
+   "recall": 0.941,
    "plate_found": 0.0
   },
   "0.55": {
    "n": 198,
-   "mae": 8.404,
-   "bias": -3.717,
-   "mdape_30_300": 1.609,
+   "mae": 7.47,
+   "bias": -4.833,
+   "mdape_30_300": 1.291,
    "n_30_300": 140,
-   "mdape_all": 2.104,
-   "precision": 0.9643,
-   "recall": 0.9266,
+   "mdape_all": 1.361,
+   "precision": 0.9759,
+   "recall": 0.9263,
    "plate_found": 0.0
   },
   "0.6": {
    "n": 198,
-   "mae": 10.308,
-   "bias": -6.338,
-   "mdape_30_300": 2.055,
+   "mae": 9.394,
+   "bias": -7.434,
+   "mdape_30_300": 1.352,
    "n_30_300": 140,
-   "mdape_all": 2.174,
-   "precision": 0.9666,
-   "recall": 0.9021,
+   "mdape_all": 1.316,
+   "precision": 0.9783,
+   "recall": 0.9018,
    "plate_found": 0.0
   },
   "0.65": {
    "n": 198,
-   "mae": 13.551,
-   "bias": -10.056,
-   "mdape_30_300": 2.667,
+   "mae": 12.702,
+   "bias": -11.116,
+   "mdape_30_300": 1.715,
    "n_30_300": 140,
-   "mdape_all": 2.784,
-   "precision": 0.969,
-   "recall": 0.8665,
+   "mdape_all": 1.827,
+   "precision": 0.9809,
+   "recall": 0.8662,
    "plate_found": 0.0
   },
   "0.7": {
    "n": 198,
-   "mae": 20.313,
-   "bias": -17.182,
-   "mdape_30_300": 2.951,
+   "mae": 19.54,
+   "bias": -18.197,
+   "mdape_30_300": 2.151,
    "n_30_300": 140,
-   "mdape_all": 4.421,
-   "precision": 0.9708,
-   "recall": 0.7953,
+   "mdape_all": 2.367,
+   "precision": 0.9833,
+   "recall": 0.7951,
    "plate_found": 0.0
   },
   "0.75": {
    "n": 198,
-   "mae": 32.419,
-   "bias": -29.551,
-   "mdape_30_300": 3.822,
+   "mae": 31.742,
+   "bias": -30.52,
+   "mdape_30_300": 2.481,
    "n_30_300": 140,
-   "mdape_all": 5.466,
-   "precision": 0.969,
-   "recall": 0.6678,
+   "mdape_all": 3.232,
+   "precision": 0.9833,
+   "recall": 0.6676,
    "plate_found": 0.0
   },
   "0.8": {
    "n": 198,
-   "mae": 41.222,
-   "bias": -38.838,
-   "mdape_30_300": 4.349,
+   "mae": 40.763,
+   "bias": -39.753,
+   "mdape_30_300": 4.057,
    "n_30_300": 140,
-   "mdape_all": 5.556,
-   "precision": 0.9687,
-   "recall": 0.573,
+   "mdape_all": 4.626,
+   "precision": 0.9846,
+   "recall": 0.5729,
    "plate_found": 0.0
   }
  },
@@ -530,7 +531,7 @@
    "source": "clinical",
    "gt": 16,
    "plate_found": false,
-   "pred": 18
+   "pred": 17
   },
   {
    "file": "public/clinical/images/aba/aba_42.jpg",
@@ -593,28 +594,28 @@
    "source": "clinical",
    "gt": 20,
    "plate_found": false,
-   "pred": 27
+   "pred": 21
   },
   {
    "file": "public/clinical/images/cst/cst_20.jpg",
    "source": "clinical",
    "gt": 3,
    "plate_found": false,
-   "pred": 4
+   "pred": 3
   },
   {
    "file": "public/clinical/images/cst/cst_21.jpg",
    "source": "clinical",
    "gt": 5,
    "plate_found": false,
-   "pred": 7
+   "pred": 5
   },
   {
    "file": "public/clinical/images/cst/cst_22.jpg",
    "source": "clinical",
    "gt": 7,
    "plate_found": false,
-   "pred": 10
+   "pred": 7
   },
   {
    "file": "public/clinical/images/cst/cst_40.jpg",
@@ -824,14 +825,14 @@
    "source": "clinical",
    "gt": 85,
    "plate_found": false,
-   "pred": 87
+   "pred": 85
   },
   {
    "file": "public/clinical/images/enc/enc_02.jpg",
    "source": "clinical",
    "gt": 55,
    "plate_found": false,
-   "pred": 61
+   "pred": 56
   },
   {
    "file": "public/clinical/images/enc/enc_03.jpg",
@@ -845,14 +846,14 @@
    "source": "clinical",
    "gt": 70,
    "plate_found": false,
-   "pred": 73
+   "pred": 70
   },
   {
    "file": "public/clinical/images/enc/enc_13.jpg",
    "source": "clinical",
    "gt": 76,
    "plate_found": false,
-   "pred": 78
+   "pred": 76
   },
   {
    "file": "public/clinical/images/enc/enc_37.jpg",
@@ -866,7 +867,7 @@
    "source": "clinical",
    "gt": 50,
    "plate_found": false,
-   "pred": 51
+   "pred": 50
   },
   {
    "file": "public/clinical/images/enc/enc_39.jpg",
@@ -880,7 +881,7 @@
    "source": "clinical",
    "gt": 86,
    "plate_found": false,
-   "pred": 87
+   "pred": 86
   },
   {
    "file": "public/clinical/images/enc/enc_41.jpg",
@@ -894,7 +895,7 @@
    "source": "clinical",
    "gt": 54,
    "plate_found": false,
-   "pred": 53
+   "pred": 52
   },
   {
    "file": "public/clinical/images/enc/enc_43.jpg",
@@ -908,105 +909,105 @@
    "source": "clinical",
    "gt": 138,
    "plate_found": false,
-   "pred": 160
+   "pred": 142
   },
   {
    "file": "public/clinical/images/kpn/kpn_16.jpg",
    "source": "clinical",
    "gt": 25,
    "plate_found": false,
-   "pred": 30
+   "pred": 27
   },
   {
    "file": "public/clinical/images/kpn/kpn_17.jpg",
    "source": "clinical",
    "gt": 25,
    "plate_found": false,
-   "pred": 33
+   "pred": 29
   },
   {
    "file": "public/clinical/images/kpn/kpn_18.jpg",
    "source": "clinical",
    "gt": 29,
    "plate_found": false,
-   "pred": 36
+   "pred": 35
   },
   {
    "file": "public/clinical/images/kpn/kpn_19.jpg",
    "source": "clinical",
    "gt": 23,
    "plate_found": false,
-   "pred": 29
+   "pred": 26
   },
   {
    "file": "public/clinical/images/kpn/kpn_23.jpg",
    "source": "clinical",
    "gt": 21,
    "plate_found": false,
-   "pred": 30
+   "pred": 23
   },
   {
    "file": "public/clinical/images/kpn/kpn_24.jpg",
    "source": "clinical",
    "gt": 22,
    "plate_found": false,
-   "pred": 27
+   "pred": 24
   },
   {
    "file": "public/clinical/images/kpn/kpn_25.jpg",
    "source": "clinical",
    "gt": 20,
    "plate_found": false,
-   "pred": 22
+   "pred": 20
   },
   {
    "file": "public/clinical/images/kpn/kpn_26.jpg",
    "source": "clinical",
    "gt": 15,
    "plate_found": false,
-   "pred": 21
+   "pred": 15
   },
   {
    "file": "public/clinical/images/kpn/kpn_27.jpg",
    "source": "clinical",
    "gt": 22,
    "plate_found": false,
-   "pred": 29
+   "pred": 26
   },
   {
    "file": "public/clinical/images/kpn/kpn_48.jpg",
    "source": "clinical",
    "gt": 111,
    "plate_found": false,
-   "pred": 126
+   "pred": 114
   },
   {
    "file": "public/clinical/images/kpn/kpn_49.jpg",
    "source": "clinical",
    "gt": 78,
    "plate_found": false,
-   "pred": 89
+   "pred": 86
   },
   {
    "file": "public/clinical/images/kpn/kpn_50.jpg",
    "source": "clinical",
    "gt": 136,
    "plate_found": false,
-   "pred": 149
+   "pred": 138
   },
   {
    "file": "public/clinical/images/mmo/mmo_01.jpg",
    "source": "clinical",
    "gt": 222,
    "plate_found": false,
-   "pred": 222
+   "pred": 221
   },
   {
    "file": "public/clinical/images/mmo/mmo_02.jpg",
    "source": "clinical",
    "gt": 433,
    "plate_found": false,
-   "pred": 436
+   "pred": 434
   },
   {
    "file": "public/clinical/images/mmo/mmo_04.jpg",
@@ -1076,7 +1077,7 @@
    "source": "clinical",
    "gt": 155,
    "plate_found": false,
-   "pred": 157
+   "pred": 155
   },
   {
    "file": "public/clinical/images/mmo/mmo_14.jpg",
@@ -1090,35 +1091,35 @@
    "source": "clinical",
    "gt": 44,
    "plate_found": false,
-   "pred": 50
+   "pred": 46
   },
   {
    "file": "public/clinical/images/ppu/ppu_02.jpg",
    "source": "clinical",
    "gt": 45,
    "plate_found": false,
-   "pred": 54
+   "pred": 50
   },
   {
    "file": "public/clinical/images/ppu/ppu_03.jpg",
    "source": "clinical",
    "gt": 40,
    "plate_found": false,
-   "pred": 50
+   "pred": 48
   },
   {
    "file": "public/clinical/images/ppu/ppu_04.jpg",
    "source": "clinical",
    "gt": 51,
    "plate_found": false,
-   "pred": 65
+   "pred": 58
   },
   {
    "file": "public/clinical/images/ppu/ppu_05.jpg",
    "source": "clinical",
    "gt": 47,
    "plate_found": false,
-   "pred": 49
+   "pred": 46
   },
   {
    "file": "public/clinical/images/ppu/ppu_06.jpg",
@@ -1139,56 +1140,56 @@
    "source": "clinical",
    "gt": 41,
    "plate_found": false,
-   "pred": 49
+   "pred": 48
   },
   {
    "file": "public/clinical/images/ppu/ppu_09.jpg",
    "source": "clinical",
    "gt": 18,
    "plate_found": false,
-   "pred": 20
+   "pred": 18
   },
   {
    "file": "public/clinical/images/ppu/ppu_10.jpg",
    "source": "clinical",
    "gt": 41,
    "plate_found": false,
-   "pred": 51
+   "pred": 47
   },
   {
    "file": "public/clinical/images/ppu/ppu_11.jpg",
    "source": "clinical",
    "gt": 40,
    "plate_found": false,
-   "pred": 52
+   "pred": 45
   },
   {
    "file": "public/clinical/images/ppu/ppu_12.jpg",
    "source": "clinical",
    "gt": 40,
    "plate_found": false,
-   "pred": 48
+   "pred": 42
   },
   {
    "file": "public/clinical/images/ppu/ppu_13.jpg",
    "source": "clinical",
    "gt": 25,
    "plate_found": false,
-   "pred": 31
+   "pred": 29
   },
   {
    "file": "public/clinical/images/ppu/ppu_14.jpg",
    "source": "clinical",
    "gt": 41,
    "plate_found": false,
-   "pred": 53
+   "pred": 46
   },
   {
    "file": "public/clinical/images/ppu/ppu_15.jpg",
    "source": "clinical",
    "gt": 52,
    "plate_found": false,
-   "pred": 59
+   "pred": 57
   },
   {
    "file": "public/clinical/images/ppu/ppu_16.jpg",
@@ -1202,42 +1203,42 @@
    "source": "clinical",
    "gt": 31,
    "plate_found": false,
-   "pred": 39
+   "pred": 37
   },
   {
    "file": "public/clinical/images/ppu/ppu_18.jpg",
    "source": "clinical",
    "gt": 36,
    "plate_found": false,
-   "pred": 42
+   "pred": 41
   },
   {
    "file": "public/clinical/images/ppu/ppu_19.jpg",
    "source": "clinical",
    "gt": 51,
    "plate_found": false,
-   "pred": 62
+   "pred": 59
   },
   {
    "file": "public/clinical/images/ppu/ppu_20.jpg",
    "source": "clinical",
    "gt": 48,
    "plate_found": false,
-   "pred": 59
+   "pred": 49
   },
   {
    "file": "public/clinical/images/ppu/ppu_21.jpg",
    "source": "clinical",
    "gt": 50,
    "plate_found": false,
-   "pred": 65
+   "pred": 58
   },
   {
    "file": "public/clinical/images/ppu/ppu_22.jpg",
    "source": "clinical",
    "gt": 41,
    "plate_found": false,
-   "pred": 51
+   "pred": 47
   },
   {
    "file": "public/clinical/images/sag/sag_44.jpg",
@@ -1293,7 +1294,7 @@
    "source": "clinical",
    "gt": 85,
    "plate_found": false,
-   "pred": 87
+   "pred": 86
   },
   {
    "file": "public/clinical/images/sau/sau_38.jpg",
@@ -1391,63 +1392,63 @@
    "source": "clinical",
    "gt": 79,
    "plate_found": false,
-   "pred": 82
+   "pred": 79
   },
   {
    "file": "public/clinical/images/sma/sma_37.jpg",
    "source": "clinical",
    "gt": 68,
    "plate_found": false,
-   "pred": 71
+   "pred": 70
   },
   {
    "file": "public/clinical/images/sma/sma_38.jpg",
    "source": "clinical",
    "gt": 73,
    "plate_found": false,
-   "pred": 75
+   "pred": 73
   },
   {
    "file": "public/clinical/images/sma/sma_39.jpg",
    "source": "clinical",
    "gt": 80,
    "plate_found": false,
-   "pred": 82
+   "pred": 79
   },
   {
    "file": "public/clinical/images/sma/sma_40.jpg",
    "source": "clinical",
    "gt": 61,
    "plate_found": false,
-   "pred": 62
+   "pred": 61
   },
   {
    "file": "public/clinical/images/sma/sma_41.jpg",
    "source": "clinical",
    "gt": 44,
    "plate_found": false,
-   "pred": 45
+   "pred": 44
   },
   {
    "file": "public/clinical/images/sma/sma_42.jpg",
    "source": "clinical",
    "gt": 134,
    "plate_found": false,
-   "pred": 140
+   "pred": 137
   },
   {
    "file": "public/clinical/images/sma/sma_43.jpg",
    "source": "clinical",
    "gt": 172,
    "plate_found": false,
-   "pred": 176
+   "pred": 175
   },
   {
    "file": "public/clinical/images/sma/sma_44.jpg",
    "source": "clinical",
    "gt": 144,
    "plate_found": false,
-   "pred": 144
+   "pred": 143
   },
   {
    "file": "public/clinical/images/sma/sma_45.jpg",
@@ -1461,7 +1462,7 @@
    "source": "clinical",
    "gt": 117,
    "plate_found": false,
-   "pred": 120
+   "pred": 118
   },
   {
    "file": "public/clinical/images/stm/stm_23.jpg",
@@ -1475,14 +1476,14 @@
    "source": "clinical",
    "gt": 108,
    "plate_found": false,
-   "pred": 111
+   "pred": 110
   },
   {
    "file": "public/clinical/images/stm/stm_26.jpg",
    "source": "clinical",
    "gt": 83,
    "plate_found": false,
-   "pred": 91
+   "pred": 87
   },
   {
    "file": "public/clinical/images/stm/stm_27.jpg",
@@ -1601,7 +1602,7 @@
    "source": "smartphone",
    "gt": 143,
    "plate_found": false,
-   "pred": 149
+   "pred": 148
   },
   {
    "file": "public/smartphone/images/sp06_img17.jpg",
@@ -1713,14 +1714,14 @@
    "source": "smartphone",
    "gt": 325,
    "plate_found": false,
-   "pred": 347
+   "pred": 346
   },
   {
    "file": "public/smartphone/images/sp06_img33.jpg",
    "source": "smartphone",
    "gt": 333,
    "plate_found": false,
-   "pred": 345
+   "pred": 344
   },
   {
    "file": "public/smartphone/images/sp06_img34.jpg",
@@ -1825,35 +1826,35 @@
    "source": "smartphone",
    "gt": 93,
    "plate_found": false,
-   "pred": 92
+   "pred": 90
   },
   {
    "file": "public/smartphone/images/sp13_img02.jpg",
    "source": "smartphone",
    "gt": 104,
    "plate_found": false,
-   "pred": 107
+   "pred": 105
   },
   {
    "file": "public/smartphone/images/sp13_img03.jpg",
    "source": "smartphone",
    "gt": 158,
    "plate_found": false,
-   "pred": 162
+   "pred": 157
   },
   {
    "file": "public/smartphone/images/sp13_img04.jpg",
    "source": "smartphone",
    "gt": 473,
    "plate_found": false,
-   "pred": 498
+   "pred": 497
   },
   {
    "file": "public/smartphone/images/sp13_img05.jpg",
    "source": "smartphone",
    "gt": 484,
    "plate_found": false,
-   "pred": 502
+   "pred": 501
   },
   {
    "file": "public/smartphone/images/sp13_img06.jpg",
@@ -1867,26 +1868,26 @@
    "source": "smartphone",
    "gt": 50,
    "plate_found": false,
-   "pred": 50
+   "pred": 48
   },
   {
    "file": "public/smartphone/images/sp17_img02.jpg",
    "source": "smartphone",
    "gt": 52,
    "plate_found": false,
-   "pred": 51
+   "pred": 49
   },
   {
    "file": "public/smartphone/images/sp17_img03.jpg",
    "source": "smartphone",
    "gt": 122,
    "plate_found": false,
-   "pred": 115
+   "pred": 110
   }
  ],
  "cpu_s_per_plate": {
-  "median": 7.19,
-  "mean": 6.27,
-  "max": 8.31
+  "median": 7.51,
+  "mean": 6.55,
+  "max": 8.46
  }
 }

@@ -61,3 +61,22 @@ def test_rescore_matches_evaluate_on_a_synthetic_cache(tmp_path):
     live |= {"plate_found": True, "conf": [0.9, 0.7, 0.3]}
     live["xy"] = [(0.0, 0.0), (10.0, 0.0), (32.0, 32.0)]
     assert got == evaluate.report([live], "val", False, "m.onnx")
+
+
+def test_report_at_a_fixed_threshold_instead_of_the_sweep():
+    plate = {
+        "file": "a.jpg",
+        "source": "s",
+        "gt": 100,
+        "gt_xy": np.zeros((0, 2)),
+        "gt_r": np.zeros(0),
+        "gt_outside": 0,
+        "plate_found": True,
+        "conf": [0.9] * 90 + [0.3] * 10 + [0.25] * 10,
+        "xy": [(0.0, 0.0)] * 110,
+    }
+    swept = evaluate.report([plate], "val", False, "m")
+    fixed = evaluate.report([plate], "test", False, "m", fixed=0.42)
+    assert (swept["threshold_source"], fixed["threshold_source"]) == ("val-sweep", "fixed")
+    assert fixed["threshold"] == 0.42 and fixed["by_source"]["overall"]["bias"] == -10
+    assert fixed["threshold_curve"].keys() == swept["threshold_curve"].keys() | {"0.42"}

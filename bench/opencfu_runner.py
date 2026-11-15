@@ -156,7 +156,7 @@ def main() -> None:
     ap.add_argument("--allow-test", action="store_true", help="test is for the final choice only")
     ap.add_argument("--no-plate", action="store_true", help="whole image, no plate crop")
     ap.add_argument("--tune", action="store_true", help="grid-search the settings (val only)")
-    ap.add_argument("--setting", type=json.loads, default=DEFAULT, help="JSON, keys as DEFAULT")
+    ap.add_argument("--setting", type=json.loads, help="JSON, keys as DEFAULT (required on test)")
     ap.add_argument("--jobs", type=int, default=6, help="parallel OpenCFU processes when tuning")
     ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
     ap.add_argument("--out", type=Path, help="default: <data dir>/bench")
@@ -165,6 +165,9 @@ def main() -> None:
         ap.error("the test split is reserved for the final model choice; pass --allow-test")
     if args.tune and args.split != "val":
         ap.error("settings are tuned on val only")
+    if args.split == "test" and not args.setting:
+        ap.error("the test split needs --setting, the one tuned on val")
+    args.setting = args.setting or DEFAULT
     args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
     args.out = args.out or args.data_dir / "bench"
     stem = args.out / f"opencfu-{args.split}{'-noplate' if args.no_plate else ''}"
@@ -189,7 +192,9 @@ def main() -> None:
         scored, seconds = evaluate_setting(plates, tmp, best, jobs=1)
 
     name = f"OpenCFU 4.0.0 ({flags(best)}, longest side {best['side']} px)"
-    rep = report(scored, args.split, args.no_plate, name, thresholds=[1.0])
+    rep = report(
+        scored, args.split, args.no_plate, name, thresholds=[1.0], fixed=None if grid else 1.0
+    )
     rep |= {"setting": best, "flags": flags(best), "threshold_curve": None}
     stem.with_suffix(".json").write_text(json.dumps(rep, indent=1) + "\n")
     md = markdown(rep, seconds).replace(", threshold 1.0", "", 1)
