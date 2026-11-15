@@ -45,3 +45,21 @@ def test_expected_files_follows_next_link_and_keeps_files_only(monkeypatch):
     monkeypatch.setattr(pa.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(pa, "API", "http://x")
     assert pa.expected_files() == {"a": (1, "sha1", "s1"), "d/b": (2, "sha256", "h2")}
+
+
+def test_split_keeps_identical_images_in_one_split_and_is_seeded():
+    # ids 2p and 2p+1 are the same file (same group); 40 plates, 80 images
+    records = [
+        {"image_id": i, "source": "dark", "group": f"g{i // 2}", "boxes": [], "file_name": f"{i}"}
+        for i in range(80)
+    ]
+
+    def split(seed):
+        out, _ = pa.build_splits({"dark": records}, seed=seed)
+        return {s: sorted(r["image_id"] for r in rs) for s, rs in out.items()}
+
+    a = split(0)
+    assert a == split(0) and a != split(1)
+    assert sum(map(len, a.values())) == 80
+    for ids in a.values():
+        assert all((i ^ 1) in ids for i in ids)  # the twin is in the same split
