@@ -20,7 +20,8 @@ Then converts the mirror into leak-free COCO splits and training tiles (<agar-di
 - plates/{val,test}/<shard>/<id>.jpg: the val/test plates at the resized scale (bench input).
 - tiles_<T>/{train,valid}/<shard>/: training tiles from make_tiles.py (T = train tile size).
 Plates are decoded straight from the parquet bytes. Colony boxes only (Defect/Contamination are
-dropped). Plates are resized per imaging setup so the median colony box is about TARGET_SIDE px,
+dropped). Plates are resized per imaging setup so the median colony box is about
+COLONYCOUNT_AGAR_COLONY_SIDE px (default 64),
 like the public mix; the factors are in the json `info`. The split is by plate group (a plate
 with the same bytes stays in one split), stratified by setup, with COLONYCOUNT_SEED and
 COLONYCOUNT_SPLIT_FRACTIONS. The data drive may be FAT32 (about 65k files per folder, 4 GB per
@@ -55,7 +56,6 @@ REVISION = "9ce24ca6611a700b2c61d22946786630c65e7764"
 BACKGROUNDS = ("bright", "dark", "vague", "lower_resolution")  # parquet `background` class order
 EMPTY, COUNTABLE = 0, 1  # parquet `image_type`; 2 = uncountable
 N_COLONY_CLASSES = 5  # `objects.category` 0-4 are the microorganisms; 5-6 Defect, Contamination
-TARGET_SIDE = 64  # px; median colony box side of the public mix is 55 (smartphone), 70 (clinical)
 
 
 def _digest(path: Path, algo: str) -> str:
@@ -148,12 +148,12 @@ def read_records(root: Path) -> list[dict]:
     return out
 
 
-def resize_factors(records: list[dict]) -> dict[str, float]:
-    """Per imaging setup: scale (never up) bringing the median colony box side to TARGET_SIDE."""
+def resize_factors(records: list[dict], side: float) -> dict[str, float]:
+    """Per imaging setup: scale (never up) bringing the median colony box side to `side` px."""
     sides: dict[str, list] = {}
     for r in records:
         sides.setdefault(r["source"], []).extend((w * h) ** 0.5 for _, _, w, h in r["boxes"])
-    return {s: round(min(1.0, TARGET_SIDE / float(np.median(v))), 2) for s, v in sides.items()}
+    return {s: round(min(1.0, side / float(np.median(v))), 2) for s, v in sides.items()}
 
 
 def plate_records(records: list[dict], factors: dict[str, float]) -> list[dict]:
@@ -200,7 +200,8 @@ def stream(root: Path, coco: dict, save_to: Path | None = None):
 
 def convert(agar_dir: Path) -> None:
     records = read_records(agar_dir)
-    factors = resize_factors([r for r in records if r["type"] == COUNTABLE])
+    side = env_int("COLONYCOUNT_AGAR_COLONY_SIDE", 64, lo=1)
+    factors = resize_factors([r for r in records if r["type"] == COUNTABLE], side)
     plates = plate_records(records, factors)
     for r in plates:  # file_name: where the resized plate is written (val/test only)
         r["file_name"] = f"plates/{{split}}/{r['shard']}/{r['image_id']}.jpg"
