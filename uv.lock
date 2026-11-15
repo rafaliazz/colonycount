@@ -465,6 +465,7 @@ dev = [
 ]
 prepare = [
     { name = "openpyxl" },
+    { name = "pyarrow" },
 ]
 yolox = [
     { name = "pycocotools" },
@@ -496,7 +497,10 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
-prepare = [{ name = "openpyxl" }]
+prepare = [
+    { name = "openpyxl" },
+    { name = "pyarrow" },
+]
 yolox = [{ name = "pycocotools", specifier = "==2.0.11" }]
 
 [[package]]

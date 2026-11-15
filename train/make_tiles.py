@@ -49,24 +49,37 @@ def tile_image(img, boxes):
             yield x, y, img[y : y + tile, x : x + tile], tile_boxes(boxes, x, y, tile)
 
 
-def make_split(coco, data_dir: Path, out: Path, empty_frac: float, rng: random.Random) -> dict:
+def read_files(coco, data_dir: Path):
+    """Yield (image record, BGR image) for every image of the COCO, read from `data_dir`."""
+    for im in coco["images"]:
+        img = cv2.imread(str(data_dir / im["file_name"]))
+        if img is None:
+            raise FileNotFoundError(data_dir / im["file_name"])
+        yield im, img
+
+
+def make_split(
+    coco, data_dir: Path, out: Path, empty_frac: float, rng: random.Random, plates=None
+) -> dict:
+    """Tile `plates` (default: the COCO's images read from `data_dir`; any iterator of
+    (image record, BGR image) works). An image record with a "shard" has its tiles written
+    into that sub-folder of `out`, so big sets stay under FAT32's ~65k files per folder."""
     out.mkdir(parents=True, exist_ok=True)
     by_image = defaultdict(list)
     for a in coco["annotations"]:
         by_image[a["image_id"]].append(a["bbox"])
     images, annotations, n_empty = [], [], 0
-    for im in coco["images"]:
-        img = cv2.imread(str(data_dir / im["file_name"]))
-        if img is None:
-            raise FileNotFoundError(data_dir / im["file_name"])
+    for im, img in plates or read_files(coco, data_dir):
         stem = Path(im["file_name"]).stem
+        shard = im.get("shard", "")
+        (out / shard).mkdir(exist_ok=True)
         for x, y, crop, boxes in tile_image(img, by_image[im["id"]]):
             if not boxes:
                 if rng.random() >= empty_frac:
                     continue
                 n_empty += 1
             tid = len(images) + 1
-            name = f"{stem}_{x}_{y}.jpg"
+            name = f"{stem}_{x}_{y}.jpg" if not shard else f"{shard}/{stem}_{x}_{y}.jpg"
             cv2.imwrite(str(out / name), crop, [cv2.IMWRITE_JPEG_QUALITY, 95])
             h, w = crop.shape[:2]
             images.append(
@@ -79,6 +92,8 @@ def make_split(coco, data_dir: Path, out: Path, empty_frac: float, rng: random.R
                      "area": b[2] * b[3], "iscrowd": 0}
                 )  # fmt: skip
     tiled = {"images": images, "annotations": annotations, "categories": coco["categories"]}
+    if "info" in coco:
+        tiled["info"] = coco["info"]
     (out / "_annotations.coco.json").write_text(json.dumps(tiled))
     return {"tiles": len(images), "empty": n_empty, "boxes": len(annotations)}
 
