@@ -37,8 +37,8 @@ FILES = {
     "yolox-m-noplate": "yolox_m/{split}-noplate",
     "opencfu": "opencfu/opencfu-{split}",
     "opencfu-noplate": "opencfu/opencfu-{split}-noplate",
-    "opencfu-grid.jsonl": "opencfu/opencfu-{split}-grid.jsonl",
-    "opencfu-noplate-grid.jsonl": "opencfu/opencfu-{split}-noplate-grid.jsonl",
+    "opencfu-grid.jsonl": "opencfu/opencfu-{split}-grid.json",
+    "opencfu-noplate-grid.jsonl": "opencfu/opencfu-{split}-noplate-grid.json",
 }
 LABELS = {  # comparison.md row labels, in this order; compare.py appends (crop)/(whole image)
     "rfdetr-nano": "RF-DETR-nano",
@@ -338,7 +338,8 @@ def publish(data_dir: Path, results: Path, split: str) -> list[str]:
             if not src.exists():
                 missing.append(name)
                 continue
-            lines = [relative(json.loads(x), root) for x in src.read_text().splitlines() if x]
+            rows = json.loads(src.read_text())  # opencfu_runner writes the grid as one JSON list
+            lines = [relative(x, root) for x in rows]
             (out / name).write_text("".join(json.dumps(x) + "\n" for x in lines))
             continue
         js, md = src.with_name(src.name + ".json"), src.with_name(src.name + ".md")

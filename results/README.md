@@ -8,7 +8,7 @@ generated from the benchmark JSON; the full per-method tables are in
 <!-- results:begin -->
 ## Summary
 
-This is the **val** split: 198 plates (142 clinical, 56 smartphone photos). Each method counted the colonies on every plate and was compared with the human count. The most accurate shipped model is **RF-DETR-nano** (median error 2.20% on plates with 30-300 colonies); the fastest is **YOLOX-Tiny** (2.4 s per plate on CPU). Every shipped model is far more accurate than the classic baseline, OpenCFU (9.99%).
+This is the **val** split: 198 plates (142 clinical, 56 smartphone photos). Each method counted the colonies on every plate and was compared with the human count. The most accurate shipped model is **RF-DETR-nano** (median error 0.75% on plates with 30-300 colonies); the fastest is **YOLOX-Tiny** (1.3 s per plate on CPU). Every shipped model is far more accurate than the classic baseline, OpenCFU (9.76%).
 
 Models marked **(ships)** are the three built into colonycount v0.1. The YOLOv8 models are benchmark-only (AGPL-3.0) and OpenCFU is the classic non-deep-learning baseline.
 
@@ -20,14 +20,14 @@ All plates. MdAPE is on plates with 30-300 true colonies; bias is predicted minu
 
 | model | MdAPE (30-300) | MAE | bias | precision | recall | CPU s/plate | threshold | license | params |
 |---|---|---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 2.20% | 5.8 | -1.2 | 96.6% | 95.4% | 14.3 | 0.45 | Apache-2.0 | 27.2 M |
-| **YOLOX-Tiny** (ships) | 2.72% | 6.2 | -1.5 | 96.3% | 94.8% | 2.4 | 0.5 | Apache-2.0 | 5.0 M |
-| **YOLOX-M** (ships) | 2.64% | 7.2 | -2.5 | 96.3% | 93.8% | 4.3 | 0.45 | Apache-2.0 | 25.3 M |
-| YOLOv8-n | 2.38% | 7.8 | +0.4 | 94.5% | 95.0% | 1.0 | 0.3 | AGPL-3.0 | 3.1 M |
-| YOLOv8-m | 2.23% | 7.9 | -0.7 | 95.1% | 94.4% | 9.5 | 0.3 | AGPL-3.0 | 25.8 M |
-| OpenCFU | 9.99% | 23.2 | -9.5 | 82.5% | 74.3% | 0.6 | - | GPL-3.0 (tool) | - |
+| **RF-DETR-nano** (ships) | 0.75% | 3.5 | -0.2 | 97.4% | 97.2% | 8.7 | 0.4 | Apache-2.0 | 27.2 M |
+| **YOLOX-Tiny** (ships) | 0.96% | 4.3 | -1.5 | 97.5% | 96.0% | 1.3 | 0.5 | Apache-2.0 | 5.0 M |
+| **YOLOX-M** (ships) | 1.05% | 4.4 | -0.5 | 97.1% | 96.6% | 4.5 | 0.35 | Apache-2.0 | 25.3 M |
+| YOLOv8-n | 1.38% | 7.7 | -3.4 | 96.4% | 93.0% | 0.9 | 0.4 | AGPL-3.0 | 3.1 M |
+| YOLOv8-m | 1.21% | 7.4 | -2.9 | 96.6% | 93.7% | 5.2 | 0.35 | AGPL-3.0 | 25.8 M |
+| OpenCFU | 9.76% | 22.5 | -11.8 | 83.9% | 73.5% | 0.6 | - | GPL-3.0 (tool) | - |
 
-Counting defaults to the plate crop: `colonycount.count` finds the plate rim and counts inside it. On this split counting the whole image was more accurate for every shipped model (next table), but the crop is listed first because it is the default.
+Counting defaults to the plate crop: `colonycount.count` finds the plate rim and counts inside it. 
 
 ## Headline: whole image
 
@@ -35,12 +35,12 @@ All plates. MdAPE is on plates with 30-300 true colonies; bias is predicted minu
 
 | model | MdAPE (30-300) | MAE | bias | precision | recall | CPU s/plate | threshold | license | params |
 |---|---|---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 1.43% | 5.0 | +0.6 | 96.2% | 96.8% | 24.5 | 0.45 | Apache-2.0 | 27.2 M |
-| **YOLOX-Tiny** (ships) | 1.43% | 5.6 | +0.2 | 95.9% | 96.1% | 4.0 | 0.5 | Apache-2.0 | 5.0 M |
-| **YOLOX-M** (ships) | 1.56% | 6.6 | -0.8 | 95.9% | 95.1% | 7.2 | 0.45 | Apache-2.0 | 25.3 M |
-| YOLOv8-n | 1.56% | 8.6 | +0.9 | 94.1% | 95.0% | 1.8 | 0.35 | AGPL-3.0 | 3.1 M |
-| YOLOv8-m | 1.44% | 9.2 | -0.8 | 94.6% | 93.8% | 8.2 | 0.35 | AGPL-3.0 | 25.8 M |
-| OpenCFU | 8.66% | 22.7 | -9.8 | 84.7% | 76.0% | 0.5 | - | GPL-3.0 (tool) | - |
+| **RF-DETR-nano** (ships) | 1.18% | 3.8 | +1.0 | 96.7% | 97.8% | 14.4 | 0.35 | Apache-2.0 | 27.2 M |
+| **YOLOX-Tiny** (ships) | 1.18% | 4.5 | -1.0 | 97.1% | 96.1% | 2.1 | 0.5 | Apache-2.0 | 5.0 M |
+| **YOLOX-M** (ships) | 1.11% | 5.6 | -2.0 | 97.1% | 95.0% | 7.5 | 0.45 | Apache-2.0 | 25.3 M |
+| YOLOv8-n | 1.43% | 7.2 | -0.7 | 95.7% | 95.0% | 1.5 | 0.35 | AGPL-3.0 | 3.1 M |
+| YOLOv8-m | 1.38% | 7.9 | -2.3 | 96.1% | 93.7% | 8.7 | 0.35 | AGPL-3.0 | 25.8 M |
+| OpenCFU | 8.57% | 22.5 | -9.3 | 84.9% | 76.5% | 0.6 | - | GPL-3.0 (tool) | - |
 
 ## By source
 
@@ -48,18 +48,18 @@ Clinical plates vs smartphone photos.
 
 | model | mode | clinical MdAPE | clinical MAE | smartphone MdAPE | smartphone MAE |
 |---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | crop | 2.54% | 3.6 | 1.70% | 11.2 |
-| **YOLOX-Tiny** (ships) | crop | 2.84% | 3.7 | 2.05% | 12.5 |
-| **YOLOX-M** (ships) | crop | 2.79% | 3.6 | 2.04% | 16.2 |
-| YOLOv8-n | crop | 2.34% | 4.8 | 3.24% | 15.4 |
-| YOLOv8-m | crop | 2.31% | 4.8 | 2.11% | 15.9 |
-| OpenCFU | crop | 9.62% | 12.6 | 11.07% | 50.1 |
-| **RF-DETR-nano** (ships) | whole image | 1.65% | 3.2 | 1.26% | 9.6 |
-| **YOLOX-Tiny** (ships) | whole image | 1.39% | 3.3 | 1.73% | 11.2 |
-| **YOLOX-M** (ships) | whole image | 1.67% | 3.1 | 1.44% | 15.4 |
-| YOLOv8-n | whole image | 1.82% | 5.2 | 1.40% | 17.0 |
-| YOLOv8-m | whole image | 1.42% | 5.0 | 1.45% | 19.8 |
-| OpenCFU | whole image | 8.82% | 12.6 | 7.63% | 48.5 |
+| **RF-DETR-nano** (ships) | crop | 0.73% | 1.3 | 1.38% | 9.2 |
+| **YOLOX-Tiny** (ships) | crop | 0.85% | 1.5 | 1.39% | 11.4 |
+| **YOLOX-M** (ships) | crop | 0.85% | 1.5 | 2.06% | 12.0 |
+| YOLOv8-n | crop | 1.05% | 2.5 | 2.00% | 21.1 |
+| YOLOv8-m | crop | 1.00% | 2.5 | 1.45% | 19.8 |
+| OpenCFU | crop | 9.70% | 11.1 | 13.33% | 51.6 |
+| **RF-DETR-nano** (ships) | whole image | 1.17% | 1.9 | 1.42% | 8.7 |
+| **YOLOX-Tiny** (ships) | whole image | 1.15% | 1.9 | 1.39% | 11.1 |
+| **YOLOX-M** (ships) | whole image | 0.82% | 1.7 | 1.44% | 15.4 |
+| YOLOv8-n | whole image | 1.55% | 3.4 | 1.40% | 16.8 |
+| YOLOv8-m | whole image | 1.30% | 3.2 | 1.45% | 19.8 |
+| OpenCFU | whole image | 9.57% | 13.1 | 5.56% | 46.3 |
 
 ## By colony density
 
@@ -67,18 +67,18 @@ True colony count per plate: <30 (46 plates), 30-300 (140 plates), >300 (12 plat
 
 | model | mode | <30 MAE | <30 MdAPE | 30-300 MAE | 30-300 MdAPE | >300 MAE | >300 MdAPE |
 |---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | crop | 2.1 | 10.32% | 5.0 | 2.20% | 28.6 | 2.90% |
-| **YOLOX-Tiny** (ships) | crop | 2.1 | 7.85% | 5.5 | 2.72% | 29.3 | 2.86% |
-| **YOLOX-M** (ships) | crop | 2.2 | 6.62% | 6.0 | 2.64% | 40.8 | 3.71% |
-| YOLOv8-n | crop | 3.7 | 14.29% | 6.5 | 2.38% | 38.3 | 5.15% |
-| YOLOv8-m | crop | 3.8 | 16.67% | 6.4 | 2.23% | 41.2 | 5.25% |
-| OpenCFU | crop | 9.9 | 47.50% | 17.9 | 9.99% | 136.3 | 18.85% |
-| **RF-DETR-nano** (ships) | whole image | 2.4 | 14.71% | 4.2 | 1.43% | 24.4 | 2.56% |
-| **YOLOX-Tiny** (ships) | whole image | 2.6 | 11.11% | 4.5 | 1.43% | 28.8 | 2.40% |
-| **YOLOX-M** (ships) | whole image | 2.6 | 11.11% | 5.0 | 1.56% | 40.1 | 4.02% |
-| YOLOv8-n | whole image | 5.2 | 33.33% | 6.7 | 1.56% | 43.6 | 4.67% |
-| YOLOv8-m | whole image | 5.2 | 34.17% | 7.0 | 1.44% | 50.3 | 4.26% |
-| OpenCFU | whole image | 10.1 | 22.84% | 16.9 | 8.66% | 139.6 | 21.60% |
+| **RF-DETR-nano** (ships) | crop | 1.5 | 2.17% | 2.6 | 0.75% | 22.4 | 2.30% |
+| **YOLOX-Tiny** (ships) | crop | 1.4 | 0.00% | 3.1 | 0.96% | 29.4 | 2.78% |
+| **YOLOX-M** (ships) | crop | 1.5 | 0.00% | 3.4 | 1.05% | 28.7 | 3.56% |
+| YOLOv8-n | crop | 3.2 | 6.11% | 5.4 | 1.38% | 52.0 | 4.05% |
+| YOLOv8-m | crop | 3.2 | 8.54% | 5.0 | 1.21% | 50.6 | 4.47% |
+| OpenCFU | crop | 9.3 | 31.67% | 16.4 | 9.76% | 145.0 | 19.07% |
+| **RF-DETR-nano** (ships) | whole image | 1.6 | 4.58% | 3.0 | 1.18% | 21.8 | 3.31% |
+| **YOLOX-Tiny** (ships) | whole image | 1.4 | 0.00% | 3.4 | 1.18% | 28.5 | 2.40% |
+| **YOLOX-M** (ships) | whole image | 1.5 | 2.08% | 4.0 | 1.11% | 39.6 | 3.91% |
+| YOLOv8-n | whole image | 3.8 | 5.83% | 5.2 | 1.43% | 42.9 | 4.36% |
+| YOLOv8-m | whole image | 3.8 | 7.33% | 5.6 | 1.38% | 50.3 | 4.39% |
+| OpenCFU | whole image | 10.3 | 31.88% | 16.9 | 8.57% | 134.5 | 19.38% |
 
 ## CPU speed
 
@@ -86,12 +86,12 @@ Median seconds per plate on CPU, one plate at a time (OpenCFU runs in a containe
 
 | model | crop | whole image |
 |---|---|---|
-| **RF-DETR-nano** (ships) | 14.3 | 24.5 |
-| **YOLOX-Tiny** (ships) | 2.4 | 4.0 |
-| **YOLOX-M** (ships) | 4.3 | 7.2 |
-| YOLOv8-n | 1.0 | 1.8 |
-| YOLOv8-m | 9.5 | 8.2 |
-| OpenCFU | 0.6 | 0.5 |
+| **RF-DETR-nano** (ships) | 8.7 | 14.4 |
+| **YOLOX-Tiny** (ships) | 1.3 | 2.1 |
+| **YOLOX-M** (ships) | 4.5 | 7.5 |
+| YOLOv8-n | 0.9 | 1.5 |
+| YOLOv8-m | 5.2 | 8.7 |
+| OpenCFU | 0.6 | 0.6 |
 
 ## How the threshold was chosen
 
@@ -99,19 +99,19 @@ A detection counts when its score is at least the threshold. For each model the 
 
 | threshold | RF-DETR-nano crop | RF-DETR-nano whole image | YOLOX-Tiny crop | YOLOX-Tiny whole image | YOLOX-M crop | YOLOX-M whole image |
 |---|---|---|---|---|---|---|
-| 0.2 | 3.13% | 2.76% | 3.00% | 2.78% | 2.87% | 2.18% |
-| 0.25 | 2.88% | 2.52% | 2.81% | 2.65% | 2.78% | 2.10% |
-| 0.3 | 2.63% | 1.90% | 2.86% | 2.51% | 2.74% | 2.02% |
-| 0.35 | 2.30% | 1.67% | 2.84% | 2.33% | 2.69% | 1.67% |
-| 0.4 | 2.37% | 1.43% | 2.86% | 2.13% | 2.75% | 1.67% |
-| 0.45 | **2.20%** | **1.43%** | 2.84% | 1.82% | **2.64%** | **1.56%** |
-| 0.5 | 2.27% | 1.49% | **2.72%** | **1.43%** | 2.75% | 1.60% |
-| 0.55 | 2.72% | 1.67% | 2.72% | 1.45% | 2.78% | 1.61% |
-| 0.6 | 3.19% | 1.99% | 2.76% | 1.61% | 2.99% | 2.06% |
-| 0.65 | 4.27% | 2.20% | 3.29% | 2.27% | 4.22% | 2.67% |
-| 0.7 | 5.08% | 3.07% | 5.24% | 2.79% | 5.75% | 2.95% |
-| 0.75 | 6.59% | 4.20% | 6.72% | 3.40% | 6.42% | 3.82% |
-| 0.8 | 8.81% | 5.58% | 8.30% | 5.04% | 7.50% | 4.35% |
+| 0.2 | 1.40% | 1.83% | 1.48% | 1.87% | 1.40% | 1.48% |
+| 0.25 | 1.30% | 1.51% | 1.41% | 1.67% | 1.27% | 1.38% |
+| 0.3 | 1.16% | 1.26% | 1.33% | 1.44% | 1.21% | 1.27% |
+| 0.35 | 0.84% | **1.18%** | 1.14% | 1.39% | **1.05%** | 1.19% |
+| 0.4 | **0.75%** | 1.18% | 1.14% | 1.39% | 1.11% | 1.29% |
+| 0.45 | 1.01% | 1.18% | 1.14% | 1.38% | 1.05% | **1.11%** |
+| 0.5 | 1.18% | 1.28% | **0.96%** | **1.18%** | 1.17% | 1.26% |
+| 0.55 | 1.37% | 1.36% | 1.04% | 1.25% | 1.05% | 1.29% |
+| 0.6 | 1.44% | 1.46% | 1.18% | 1.33% | 1.18% | 1.35% |
+| 0.65 | 2.08% | 2.01% | 1.61% | 1.89% | 1.53% | 1.72% |
+| 0.7 | 2.94% | 2.83% | 2.27% | 2.19% | 1.83% | 2.15% |
+| 0.75 | 4.20% | 4.20% | 2.90% | 2.80% | 2.53% | 2.48% |
+| 0.8 | 6.13% | 5.56% | 4.20% | 4.04% | 3.51% | 4.06% |
 
 ## How to read these metrics
 
@@ -122,32 +122,46 @@ A detection counts when its score is at least the threshold. For each model the 
 - **match radius**: a detection matches a true colony when its centre is within half the colony's mean box side of the true centre; each colony matches at most once.
 <!-- results:end -->
 
+## Settings (frozen 2026-11-15)
+
+These numbers use the settings frozen before the one-time test run, all chosen on val:
+
+| setting | value | was (results of 2026-11-13/14) |
+|---|---|---|
+| plate finder | Hough circle on the brightest colour channel, edge threshold 50 | grey image, edge threshold 100 (missed 55 of 198 plates) |
+| plate radius pad (`COLONYCOUNT_PLATE_PAD`) | +5% | none (cut off 1.35% of colonies at the rim) |
+| default mode | plate crop | plate crop |
+| NMS IoU (`COLONYCOUNT_NMS_IOU`) | 0.4 | 0.5 |
+| score threshold, crop / whole image | RF-DETR-nano 0.40 / 0.35, YOLOX-Tiny 0.50 / 0.50, YOLOX-M 0.35 / 0.45, YOLOv8-n 0.40 / 0.35, YOLOv8-m 0.35 / 0.35 | 0.30-0.50, picked under the old plate finder and NMS 0.5 |
+| OpenCFU setting, crop / whole image | `-d bil -t 5 -r 4 -R 30` at 1000 px / `-d bil -t 5 -r 6 -R 45` at 1500 px (full 56-setting grid) | partial grid (see below) |
+
+Thresholds come from the automatic val sweep (0.20-0.80, lowest MdAPE 30-300, tie-break MAE). Since
+the plate finder, pad, NMS and thresholds were all chosen on these 198 plates, val is now more
+optimistic than before: the honest numbers come from the one-time test run, which reuses these
+settings unchanged (`bench/evaluate.py --split test` requires a fixed `--threshold`;
+`opencfu_runner.py --split test` requires the val-tuned `--setting`). The previous val outputs are
+kept outside the repo under `<data dir>/bench/_pre-wave2/`.
+
 ## Files (`benchmark/val/`)
 
 | file | what |
 |---|---|
-| `rfdetr-nano.json` / `.md` | colonycount with the RF-DETR-nano model, plate crop on, threshold 0.45 (`bench/evaluate.py`) |
+| `rfdetr-nano.json` / `.md` | colonycount with RF-DETR-nano, plate crop on (`bench/evaluate.py`) |
 | `rfdetr-nano-noplate.json` / `.md` | same, whole image (`--no-plate`) |
-| `yolov8n.json` / `.md` | colonycount with the YOLOv8-n model, plate crop on, threshold 0.3 (`bench/evaluate.py`) |
-| `yolov8n-noplate.json` / `.md` | same, whole image, threshold 0.35 |
-| `yolov8m.json` / `.md` | colonycount with the YOLOv8-m model, plate crop on, threshold 0.3 (`bench/evaluate.py`) |
-| `yolov8m-noplate.json` / `.md` | same, whole image, threshold 0.35 |
-| `yolox-tiny.json` / `.md` | colonycount with the YOLOX-Tiny model, plate crop on, threshold 0.5 (`bench/evaluate.py`) |
-| `yolox-tiny-noplate.json` / `.md` | same, whole image, threshold 0.5 |
-| `yolox-m.json` / `.md` | colonycount with the YOLOX-M model, plate crop on, threshold 0.45 (`bench/evaluate.py`) |
-| `yolox-m-noplate.json` / `.md` | same, whole image, threshold 0.45 |
-| `opencfu.json` / `.md` | OpenCFU baseline, plate crop on, best tuned setting (`bench/opencfu_runner.py`) |
-| `opencfu-noplate.json` / `.md` | same, whole image |
-| `opencfu-grid.jsonl` | OpenCFU settings grid on val, plate crop: one JSON line per setting (partial, see caveats) |
-| `opencfu-noplate-grid.jsonl` | same, whole image (partial) |
+| `yolox-tiny.json` / `.md`, `-noplate` | YOLOX-Tiny, crop / whole image |
+| `yolox-m.json` / `.md`, `-noplate` | YOLOX-M, crop / whole image |
+| `yolov8n.json` / `.md`, `-noplate` | YOLOv8-n (benchmark only), crop / whole image |
+| `yolov8m.json` / `.md`, `-noplate` | YOLOv8-m (benchmark only), crop / whole image |
+| `opencfu.json` / `.md`, `-noplate` | OpenCFU baseline at its best tuned setting (`bench/opencfu_runner.py`) |
+| `opencfu-grid.jsonl`, `opencfu-noplate-grid.jsonl` | the full OpenCFU settings grid on val (56 settings each), one JSON line per setting |
 | `comparison.md` | all methods side by side, per source, per density bucket and overall (`bench/compare.py`) |
 
 Columns: `mae` and `bias` (predicted minus true) in colonies per plate; `mdape_30_300` is the
 median absolute percentage error on plates whose true count is 30-300 (`n_30_300` of them);
 `precision`/`recall` are per colony; `plate_found` is the share of plates where the plate rim was
 found (0 with the crop off). CPU s/plate is the median wall time per plate on CPU, one plate at a
-time: around `colonycount.count` for the model, around the `opencfu` call inside the container for
-OpenCFU (which sees images resized to a 1000 px longest side).
+time: around `colonycount.count` for the models, around the `opencfu` call inside the container for
+OpenCFU (which sees images resized to the setting's longest side).
 
 The JSONs are the tools' outputs with two changes made by `bench/publish_results.py`: paths are
 relative to `COLONYCOUNT_DATA_DIR` (none are absolute), and `cpu_s_per_plate` (median/mean/max,
@@ -155,43 +169,34 @@ from the `.md`'s CPU-time line, since the JSONs are kept free of timings) is add
 
 ## Commands
 
-Equivalent to the runs above (the output folders match the data layout that
-`publish_results.py` reads):
+Equivalent to the runs above (the output folders match what `publish_results.py` reads):
 
 ```powershell
-# RF-DETR-nano (writes $env:COLONYCOUNT_DATA_DIR/bench/run1/val[-noplate].json/.md)
-uv run python bench/evaluate.py --model "$env:COLONYCOUNT_DATA_DIR/models/public-rfdetr-nano-20261113.onnx" --split val --out "$env:COLONYCOUNT_DATA_DIR/bench/run1"
-uv run python bench/evaluate.py --model "$env:COLONYCOUNT_DATA_DIR/models/public-rfdetr-nano-20261113.onnx" --split val --no-plate --out "$env:COLONYCOUNT_DATA_DIR/bench/run1"
-
-# YOLOv8-n / YOLOv8-m (writes bench/yolov8n|yolov8m/val[-noplate].json/.md); same for yolov8m
-uv run python bench/evaluate.py --model "$env:COLONYCOUNT_DATA_DIR/models/yolov8n-20261113.onnx" --split val --out "$env:COLONYCOUNT_DATA_DIR/bench/yolov8n"
-uv run python bench/evaluate.py --model "$env:COLONYCOUNT_DATA_DIR/models/yolov8n-20261113.onnx" --split val --no-plate --out "$env:COLONYCOUNT_DATA_DIR/bench/yolov8n"
-
-# YOLOX-Tiny / YOLOX-M (writes bench/yolox_tiny|yolox_m/val[-noplate].json/.md); same for yolox_m
-uv run python bench/evaluate.py --model "$env:COLONYCOUNT_DATA_DIR/models/yolox_tiny-20261114.onnx" --split val --out "$env:COLONYCOUNT_DATA_DIR/bench/yolox_tiny"
-uv run python bench/evaluate.py --model "$env:COLONYCOUNT_DATA_DIR/models/yolox_tiny-20261114.onnx" --split val --no-plate --out "$env:COLONYCOUNT_DATA_DIR/bench/yolox_tiny"
-
-# OpenCFU: settings grid (its printed lines are the -grid-partial.jsonl files), then the finals
+$d = $env:COLONYCOUNT_DATA_DIR
+# each model: crop, then whole image; writes bench/<name>/val[-noplate].json/.md (+ .npz with --save-detections)
+foreach ($m in @(@('rfdetr-nano','public-rfdetr-nano-20261113'), @('yolox_tiny','yolox_tiny-20261114'),
+                 @('yolox_m','yolox_m-20261114'), @('yolov8n','yolov8n-20261113'), @('yolov8m','yolov8m-20261113'))) {
+  uv run python bench/evaluate.py --model "$d/models/$($m[1]).onnx" --split val --save-detections --out "$d/bench/$($m[0])"
+  uv run python bench/evaluate.py --model "$d/models/$($m[1]).onnx" --split val --save-detections --no-plate --out "$d/bench/$($m[0])"
+}
+# OpenCFU: tune the grid on val (writes bench/opencfu/opencfu-val[-noplate].json/.md and -grid.json)
 docker build -t colonycount-opencfu bench/opencfu
-uv run python bench/opencfu_runner.py --tune > "$env:COLONYCOUNT_DATA_DIR/bench/opencfu-val-grid-partial.jsonl"
-uv run python bench/opencfu_runner.py --tune --no-plate > "$env:COLONYCOUNT_DATA_DIR/bench/opencfu-val-noplate-grid-partial.jsonl"
-uv run python bench/opencfu_runner.py --setting '{"side": 1000, "mode": "bil -t 5", "r_min": 0.004, "r_max": 0.06}' --out "$env:COLONYCOUNT_DATA_DIR/bench/final"
-uv run python bench/opencfu_runner.py --no-plate --setting '{"side": 1000, "mode": "bil -t 3", "r_min": 0.004, "r_max": 0.03}' --out "$env:COLONYCOUNT_DATA_DIR/bench/final"
-
-# copy into results/ and regenerate comparison.md
+uv run python bench/opencfu_runner.py --split val --tune --out "$d/bench/opencfu"
+uv run python bench/opencfu_runner.py --split val --tune --no-plate --out "$d/bench/opencfu"
+# copy into results/ and regenerate the report, comparison.md and the README summary
 uv run python bench/publish_results.py --split val
 ```
 
-(POSIX shells: `$COLONYCOUNT_DATA_DIR` instead of `$env:COLONYCOUNT_DATA_DIR`; the default data
-dir is `~/data/colonycount`.) The source locations `publish_results.py` reads are listed in its
-`FILES` table; any it cannot find are skipped and printed.
+(POSIX shells: `$COLONYCOUNT_DATA_DIR`; the default data dir is `~/data/colonycount`.)
 
 ## Provenance
 
-- Date: 2026-11-13. Split: **val**, 198 plates (142 clinical, 56 smartphone). The test split was
-  not touched; it is reserved for one final run on all models.
-- Benchmark code: `bench/evaluate.py` as in commit 5c0e0bd (RF-DETR runs);
-  `bench/opencfu_runner.py` as in commit 507a7b8 (OpenCFU runs).
+- Date: 2026-11-15 (val re-run under the frozen settings). Split: **val**, 198 plates (142 clinical,
+  56 smartphone). The test split was not touched; it is reserved for one run on all models with the
+  settings above.
+- Benchmark code: `bench/evaluate.py` and `bench/opencfu_runner.py` as in the commit that published
+  these files. The runs were sequential, in one PowerShell window, with nothing else heavy running,
+  so the CPU times are comparable across methods.
 - Model: `models/public-rfdetr-nano-20261113.onnx`, sha256
   `42e7602cbcbb4b18d1851464b660a42d744d0b86edf11c02eb62046141081586`, exported from training run
   `rfdetr_nano/20261113-010505` (best epoch 10, val mAP@0.5:0.95 0.680).
@@ -230,26 +235,8 @@ dir is `~/data/colonycount`.) The source locations `publish_results.py` reads ar
   - ONNX parity vs YOLOX's own `postprocess()` (8 val tiles, score >= 0.3): Tiny 159 boxes,
     0 count mismatches, max diff 4.8e-07 score / 6.1e-05 px box; M 162 boxes, 0 count
     mismatches, max diff 8.6e-07 score / 7.6e-05 px box.
-  - Thresholds (Tiny 0.5, M 0.45, same for crop and whole image) were picked on val by the same
-    rule as RF-DETR's.
-- v0.1 candidates (owner decision): YOLOX-Tiny (`public-fast`) and RF-DETR-nano (`public`).
-  YOLOX-M is benchmark-only.
+- Shipped in v0.1 (owner decision 2026-11-15): `rfdetr-nano` (default), `yolox-tiny` and `yolox-m`.
+  YOLOv8-n/m are benchmark-only (AGPL-3.0).
 - OpenCFU 4.0.0 (Debian package `opencfu 4.0.0+dfsg-2+b2`), image from `bench/opencfu/Dockerfile`.
-- Threshold 0.45 was chosen **on val** (lowest MdAPE 30-300, tie-break MAE), and OpenCFU's settings
-  were also tuned on val, so all numbers here are optimistic; an unbiased number needs the test
-  split.
 - Matching rule (`bench/evaluate.py`): a prediction matches a true colony when its centre lies
   within half the colony box's mean side of the box centre; greedy one-to-one, nearest pairs first.
-- Determinism: the RF-DETR crop run was repeated (`run2`) and `val.json`/`val.md` were
-  byte-identical to `run1`.
-
-## Caveats
-
-- CPU s/plate is not strictly comparable between runs (runs were on different days, some from different shells): the YOLOv8-m whole-image run was done
-  from the owner's terminal, while the YOLOv8-m crop run was done from a Claude Code background
-  shell under memory pressure, which is part of why its CPU time per plate (9.48 s) is higher
-  than the whole-image run's (8.23 s).
-- The OpenCFU grid (2 sides x 7 threshold modes x 2 x 2 radius ranges) was stopped early. Plate
-  crop: 27 of the 28 settings at 1000 px (`-a -r 4 -R 60` missing), none at 1500 px. Whole image:
-  all 28 at 1000 px, 2 of 28 at 1500 px. The final OpenCFU runs use the best 1000 px setting of
-  each grid (crop `-d bil -t 5 -r 4 -R 60`, whole image `-d bil -t 3 -r 4 -R 30`).

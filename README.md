@@ -13,10 +13,10 @@ On the val split, plate crop on (the default). MdAPE is the median error of the 
 
 | model | MdAPE (30-300) | MAE | CPU s/plate | license |
 |---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 2.20% | 5.8 | 14.3 | Apache-2.0 |
-| **YOLOX-Tiny** (ships) | 2.72% | 6.2 | 2.4 | Apache-2.0 |
-| **YOLOX-M** (ships) | 2.64% | 7.2 | 4.3 | Apache-2.0 |
-| OpenCFU | 9.99% | 23.2 | 0.6 | GPL-3.0 (tool) |
+| **RF-DETR-nano** (ships) | 0.75% | 3.5 | 8.7 | Apache-2.0 |
+| **YOLOX-Tiny** (ships) | 0.96% | 4.3 | 1.3 | Apache-2.0 |
+| **YOLOX-M** (ships) | 1.05% | 4.4 | 4.5 | Apache-2.0 |
+| OpenCFU | 9.76% | 22.5 | 0.6 | GPL-3.0 (tool) |
 
 These are val-split numbers, slightly optimistic because the thresholds were chosen on it. Full report: [results/README.md](results/README.md).
 <!-- results:end -->
