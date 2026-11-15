@@ -42,7 +42,6 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import pyarrow.parquet as pq
 from dotenv import load_dotenv
 from make_tiles import make_split
 from prepare_public import build_splits, download, to_coco
@@ -123,6 +122,8 @@ def verify(expected: dict[str, tuple[int, str, str]], root: Path) -> list[str]:
 def read_records(root: Path) -> list[dict]:
     """One record per image from the parquet shards. The group is the hash of the JPEG bytes:
     identical files (the release has 6 pairs, 4 of them across its own splits) are one plate."""
+    import pyarrow.parquet as pq  # prepare dependency group only
+
     out = []
     for f in sorted((root / "hf" / "data").glob("*/*.parquet")):
         batches = pq.ParquetFile(f).iter_batches(16)  # whole shards are ~0.5 GB of jpg bytes
@@ -176,6 +177,8 @@ def plate_records(records: list[dict], factors: dict[str, float]) -> list[dict]:
 def stream(root: Path, coco: dict, save_to: Path | None = None):
     """Yield (image record, resized BGR plate) for the COCO's images in parquet order, decoded
     from the parquet bytes; with `save_to`, also write each plate there as a jpg."""
+    import pyarrow.parquet as pq  # prepare dependency group only
+
     by_id = {im["image_id"]: im for im in coco["images"]}
     for shard in sorted({im["parquet"] for im in coco["images"]}):
         for b in pq.ParquetFile(root / shard).iter_batches(8, columns=["image", "image_id"]):
