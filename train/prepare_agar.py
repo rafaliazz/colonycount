@@ -4,7 +4,8 @@ Source: https://huggingface.co/datasets/leodriesch/agar at the revision pinned b
 33.5 GB; parquet shards under data/, annotations under annotations/). Original dataset: AGAR by
 NeuroSYS, CC BY-NC 2.0 (see DATA.md).
 
-Usage: uv run --group prepare python train/prepare_agar.py [--agar-dir DIR] [--skip-download]
+Usage: uv run --group prepare python train/prepare_agar.py [--agar-dir DIR]
+       [--verify-only | --skip-download]
 
 Files land in <agar-dir>/hf; the download is resumable and adopts files already present there
 (e.g. from `hf download leodriesch/agar --local-dir <agar-dir>/hf`); plain HTTP via the standard
@@ -24,7 +25,7 @@ like the public mix; the factors are in the json `info`. The split is by plate g
 with the same bytes stays in one split), stratified by setup, with COLONYCOUNT_SEED and
 COLONYCOUNT_SPLIT_FRACTIONS. The data drive may be FAT32 (about 65k files per folder, 4 GB per
 file): tiles and plates go into shard folders. --skip-download skips the download and the
-checksum pass (no network).
+checksum pass (no network); --verify-only checks the files without downloading or converting.
 """
 
 from __future__ import annotations
@@ -239,7 +240,9 @@ def main(argv: list[str] | None = None) -> None:
     load_dotenv(".env")  # from the working directory; real environment variables win
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--agar-dir", type=Path, help="default: COLONYCOUNT_AGAR_DIR")
-    p.add_argument("--skip-download", action="store_true", help="no download or checksums")
+    mode = p.add_mutually_exclusive_group()
+    mode.add_argument("--verify-only", action="store_true", help="check files, no download/convert")
+    mode.add_argument("--skip-download", action="store_true", help="no download or checksums")
     args = p.parse_args(argv)
     agar_dir = (
         args.agar_dir.expanduser()
@@ -250,12 +253,14 @@ def main(argv: list[str] | None = None) -> None:
     root = agar_dir / "hf"
     if not args.skip_download:
         expected = expected_files()
-        fetch_all(expected, root)
+        if not args.verify_only:
+            fetch_all(expected, root)
         problems = verify(expected, root)
         if problems:
             raise SystemExit("\n".join(problems) + f"\n{len(problems)} problem(s) in {root}")
         print(f"AGAR verified in {root}")
-    convert(agar_dir)
+    if not args.verify_only:
+        convert(agar_dir)
 
 
 if __name__ == "__main__":
