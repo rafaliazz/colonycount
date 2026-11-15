@@ -25,8 +25,8 @@ from colonycount._env import env_path
 
 # stable name in results/ -> source under <data dir>/bench, {split} filled in
 FILES = {
-    "rfdetr-nano": "run1/{split}",
-    "rfdetr-nano-noplate": "run1/{split}-noplate",
+    "rfdetr-nano": "rfdetr-nano/{split}",
+    "rfdetr-nano-noplate": "rfdetr-nano/{split}-noplate",
     "yolov8n": "yolov8n/{split}",
     "yolov8n-noplate": "yolov8n/{split}-noplate",
     "yolov8m": "yolov8m/{split}",
@@ -35,10 +35,10 @@ FILES = {
     "yolox-tiny-noplate": "yolox_tiny/{split}-noplate",
     "yolox-m": "yolox_m/{split}",
     "yolox-m-noplate": "yolox_m/{split}-noplate",
-    "opencfu": "final/opencfu-{split}",
-    "opencfu-noplate": "final/opencfu-{split}-noplate",
-    "opencfu-grid.jsonl": "opencfu-{split}-grid-partial.jsonl",
-    "opencfu-noplate-grid.jsonl": "opencfu-{split}-noplate-grid-partial.jsonl",
+    "opencfu": "opencfu/opencfu-{split}",
+    "opencfu-noplate": "opencfu/opencfu-{split}-noplate",
+    "opencfu-grid.jsonl": "opencfu/opencfu-{split}-grid.jsonl",
+    "opencfu-noplate-grid.jsonl": "opencfu/opencfu-{split}-noplate-grid.jsonl",
 }
 LABELS = {  # comparison.md row labels, in this order; compare.py appends (crop)/(whole image)
     "rfdetr-nano": "RF-DETR-nano",

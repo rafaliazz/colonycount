@@ -12,8 +12,9 @@ Metrics, per source and overall: MAE, bias (mean of predicted minus true), MdAPE
 true count is 30-300 (and on all plates with a non-zero count), detection precision/recall (a
 prediction matches a true colony when its centre lies within half the box's mean side of the box
 centre; greedy one-to-one, nearest first), plate_found rate, and errors by density bucket. The
-threshold is picked on this split: lowest MdAPE (30-300), tie-break MAE. The test split is reserved
-for the final model choice and needs --allow-test. Writes <out>/<split>[-noplate].json
+threshold is picked on this split: lowest MdAPE (30-300), tie-break MAE, unless --threshold fixes
+it (required on test, where nothing is ever swept). The test split is reserved for the final model
+choice and needs --allow-test. Writes <out>/<split>[-noplate].json
 (deterministic, no timings) and .md.
 """
 
@@ -91,13 +92,23 @@ def summarize(plates: list[dict], t: float) -> dict:
 
 
 def report(
-    plates: list[dict], split: str, no_plate: bool, model: str, thresholds=THRESHOLDS
+    plates: list[dict],
+    split: str,
+    no_plate: bool,
+    model: str,
+    thresholds=THRESHOLDS,
+    fixed: float | None = None,
 ) -> dict:
+    """Tables at the swept-best threshold, or at ``fixed`` (the curve still covers the sweep)."""
+    if fixed is not None:
+        thresholds = sorted({*thresholds, fixed})
     curve = {str(t): summarize(plates, t) for t in thresholds}
-    best = min(
-        thresholds,
-        key=lambda t: (curve[str(t)]["mdape_30_300"] or float("inf"), curve[str(t)]["mae"]),
-    )
+    best = fixed
+    if best is None:
+        best = min(
+            thresholds,
+            key=lambda t: (curve[str(t)]["mdape_30_300"] or float("inf"), curve[str(t)]["mae"]),
+        )
     sources = sorted({p["source"] for p in plates})
     rows = {s: summarize([p for p in plates if p["source"] == s], best) for s in sources}
     rows["overall"] = curve[str(best)]
@@ -116,6 +127,7 @@ def report(
         "plate_restriction": not no_plate,
         "match_radius": "0.5 x mean GT box side, around the GT box centre",
         "threshold": best,
+        "threshold_source": "val-sweep" if fixed is None else "fixed",
         "by_source": rows,
         "by_density": buckets,
         "threshold_curve": curve,
@@ -270,6 +282,7 @@ def main() -> None:
     ap.add_argument("--split", default="val", choices=["val", "test"])
     ap.add_argument("--allow-test", action="store_true", help="test is for the final choice only")
     ap.add_argument("--no-plate", action="store_true", help="count the whole image, no plate crop")
+    ap.add_argument("--threshold", type=float, help="report at this fixed threshold, no sweep")
     ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
     ap.add_argument("--out", type=Path, help="default: <data dir>/bench")
     ap.add_argument("--save-detections", action="store_true", help="also write <stem>.npz")
@@ -277,11 +290,13 @@ def main() -> None:
     args = ap.parse_args()
     if args.split == "test" and not args.allow_test:
         ap.error("the test split is reserved for the final model choice; pass --allow-test")
+    if args.split == "test" and args.threshold is None:
+        ap.error("the test split needs --threshold, fixed on val; it is never swept on test")
     args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
     args.out = args.out or args.data_dir / "bench"
 
     plates, seconds = run(args.model, args.split, args.data_dir, args.no_plate, args.limit)
-    rep = report(plates, args.split, args.no_plate, args.model.name)
+    rep = report(plates, args.split, args.no_plate, args.model.name, fixed=args.threshold)
     args.out.mkdir(parents=True, exist_ok=True)
     stem = args.out / (args.split + ("-noplate" if args.no_plate else ""))
     stem.with_suffix(".json").write_text(json.dumps(rep, indent=1) + "\n")
