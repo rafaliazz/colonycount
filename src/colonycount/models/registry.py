@@ -38,7 +38,7 @@ MODELS = {
             license="CC-BY-4.0",
             url="https://huggingface.co/rafali-azz/colonycount-public/resolve/v0.1.0/public.onnx",
             sha256=None,
-            threshold=0.45,
+            threshold=0.40,
         ),
     ]
 }

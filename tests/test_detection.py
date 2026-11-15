@@ -7,6 +7,7 @@ import pytest
 from conftest import make_plate
 
 import colonycount
+from colonycount.detection.plate import find_plate
 from colonycount.detection.runner import load_session, tile_size
 from colonycount.detection.tiling import detect_tiled
 
@@ -100,3 +101,10 @@ def test_overlap_must_be_below_tile_size(placeholder, monkeypatch):
     monkeypatch.setenv("COLONYCOUNT_TILE_OVERLAP", "96")
     with pytest.raises(ValueError, match="COLONYCOUNT_TILE_OVERLAP"):
         colonycount.count(make_plate()[0], model_path=placeholder(96))
+
+
+def test_find_plate_red_disc_padded():
+    img = np.zeros((512, 512, 3), np.uint8)
+    cv2.circle(img, (260, 250), 190, (255, 30, 30), -1)  # red-lit plate: weak luma edge
+    cx, cy, r = find_plate(img)
+    assert abs(cx - 260) < 5 and abs(cy - 250) < 5 and abs(r - 190 * 1.05) < 8
