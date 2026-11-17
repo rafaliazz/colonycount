@@ -40,7 +40,9 @@ def test_relative_rewrites_paths_under_root_and_rejects_others(tmp_path):
 
 def test_readmes_are_regenerated_and_match_the_json():
     root = Path(__file__).parent.parent
-    folder = RESULTS / "val"
+    folder = (
+        RESULTS / "test" if (RESULTS / "test").is_dir() else RESULTS / "val"
+    )  # READMEs show test once run
     full, short = (root / "results" / "README.md"), (root / "README.md")
     block = publish_results.report(folder)
     assert publish_results.splice(full.read_text(), block) == full.read_text()
