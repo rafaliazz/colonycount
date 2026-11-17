@@ -145,8 +145,14 @@ def readme_summary(folder: Path, link: str) -> str:
             "plate, and CPU time is the median per plate:",
             "",
             *_table(SHORT_HEAD, _headline_rows(reps, "", True)),
-            f"These are {split}-split numbers, slightly optimistic because the thresholds were "
-            f"chosen on it. Full report: [{link}]({link}).",
+            (
+                f"These are {split}-split numbers, slightly optimistic because the thresholds were "
+                "chosen on it."
+                if split == "val"
+                else "Held-out test split (unseen plates), run once with every setting fixed on "
+                "the validation split."
+            )
+            + f" Full report: [{link}]({link}).",
             "<!-- results:end -->",
         ]
     )
@@ -252,7 +258,8 @@ def report(folder: Path) -> str:
                 cells = [_name(base), mode]
                 for b in dens:
                     d = r["by_density"]["all"][b]
-                    cells += [f"{d['mae']:.1f}", f"{d['mdape_all']:.2f}%"]
+                    empty = d["mae"] is None  # e.g. no >300 plates in a split
+                    cells += ["-", "-"] if empty else [f"{d['mae']:.1f}", f"{d['mdape_all']:.2f}%"]
                 rows.append(cells)
     out += [
         "## By colony density",
@@ -282,7 +289,12 @@ def report(folder: Path) -> str:
         "A detection counts when its score is at least the threshold. For each model the "
         "threshold was swept automatically on the validation split from 0.20 to 0.80 and the "
         "value with the lowest MdAPE (30-300) was kept, ties broken by the lowest MAE. "
-        "MdAPE by threshold (the chosen one in bold):",
+        + (
+            "MdAPE by threshold (the chosen one in bold):"
+            if split == "val"
+            else "Below, MdAPE on this test split by threshold, for information only: the bold "
+            "value is the one fixed on validation, not the best one here."
+        ),
         "",
     ]
     cols = [(b + s, f"{LABELS[b]} {m}") for b in ship for s, m in MODES]
@@ -335,6 +347,8 @@ def publish(data_dir: Path, results: Path, split: str) -> list[str]:
     for name, src in FILES.items():
         src = src_dir / src.format(split=split)
         if name.endswith(".jsonl"):
+            if split == "test":  # settings are tuned on val only; test has no grid
+                continue
             if not src.exists():
                 missing.append(name)
                 continue
