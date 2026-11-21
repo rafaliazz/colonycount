@@ -36,7 +36,7 @@ MODELS = {
             name="rfdetr-nano",
             version="0.1.0",
             license="CC-BY-4.0",
-            url="https://huggingface.co/rafali-azz/colonycount-public/resolve/v0.1.0/public.onnx",
+            url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/public.onnx",
             sha256=None,
             threshold=0.40,
         ),
