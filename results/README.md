@@ -8,11 +8,11 @@ generated from the benchmark JSON; the full per-method tables are in
 <!-- results:begin -->
 ## Summary
 
-This is the **val** split: 198 plates (142 clinical, 56 smartphone photos). Each method counted the colonies on every plate and was compared with the human count. The most accurate shipped model is **RF-DETR-nano** (median error 0.75% on plates with 30-300 colonies); the fastest is **YOLOX-Tiny** (1.3 s per plate on CPU). Every shipped model is far more accurate than the classic baseline, OpenCFU (9.76%).
+This is the **test** split: 192 plates (142 clinical, 50 smartphone photos). Each method counted the colonies on every plate and was compared with the human count. The most accurate shipped model is **YOLOX-M** (median error 0.92% on plates with 30-300 colonies); the fastest is **YOLOX-Tiny** (1.6 s per plate on CPU). Every shipped model is far more accurate than the classic baseline, OpenCFU (10.12%).
 
 Models marked **(ships)** are the three built into colonycount v0.1. The YOLOv8 models are benchmark-only (AGPL-3.0) and OpenCFU is the classic non-deep-learning baseline.
 
-> These are val-split numbers. The detection thresholds and the best training epochs were chosen on this split, so they are slightly optimistic; the held-out test split is run once on all models at release and this report is then regenerated.
+> Held-out test split, run once; thresholds were fixed on the validation split.
 
 ## Headline: crop (default)
 
@@ -20,12 +20,12 @@ All plates. MdAPE is on plates with 30-300 true colonies; bias is predicted minu
 
 | model | MdAPE (30-300) | MAE | bias | precision | recall | CPU s/plate | threshold | license | params |
 |---|---|---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 0.75% | 3.5 | -0.2 | 97.4% | 97.2% | 8.7 | 0.4 | Apache-2.0 | 27.2 M |
-| **YOLOX-Tiny** (ships) | 0.96% | 4.3 | -1.5 | 97.5% | 96.0% | 1.3 | 0.5 | Apache-2.0 | 5.0 M |
-| **YOLOX-M** (ships) | 1.05% | 4.4 | -0.5 | 97.1% | 96.6% | 4.5 | 0.35 | Apache-2.0 | 25.3 M |
-| YOLOv8-n | 1.38% | 7.7 | -3.4 | 96.4% | 93.0% | 0.9 | 0.4 | AGPL-3.0 | 3.1 M |
-| YOLOv8-m | 1.21% | 7.4 | -2.9 | 96.6% | 93.7% | 5.2 | 0.35 | AGPL-3.0 | 25.8 M |
-| OpenCFU | 9.76% | 22.5 | -11.8 | 83.9% | 73.5% | 0.6 | - | GPL-3.0 (tool) | - |
+| **RF-DETR-nano** (ships) | 1.06% | 1.1 | -0.0 | 98.3% | 98.2% | 9.0 | 0.4 | Apache-2.0 | 27.2 M |
+| **YOLOX-Tiny** (ships) | 1.45% | 1.8 | -1.0 | 98.5% | 97.1% | 1.6 | 0.5 | Apache-2.0 | 5.0 M |
+| **YOLOX-M** (ships) | 0.92% | 1.0 | +0.0 | 98.1% | 98.1% | 6.0 | 0.35 | Apache-2.0 | 25.3 M |
+| YOLOv8-n | 2.11% | 2.4 | -1.3 | 98.3% | 96.3% | 1.1 | 0.4 | AGPL-3.0 | 3.1 M |
+| YOLOv8-m | 1.53% | 2.2 | -1.1 | 98.3% | 96.7% | 6.6 | 0.35 | AGPL-3.0 | 25.8 M |
+| OpenCFU | 10.12% | 10.6 | +4.2 | 82.7% | 87.9% | 1.1 | - | GPL-3.0 (tool) | - |
 
 Counting defaults to the plate crop: `colonycount.count` finds the plate rim and counts inside it. 
 
@@ -35,12 +35,12 @@ All plates. MdAPE is on plates with 30-300 true colonies; bias is predicted minu
 
 | model | MdAPE (30-300) | MAE | bias | precision | recall | CPU s/plate | threshold | license | params |
 |---|---|---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | 1.18% | 3.8 | +1.0 | 96.7% | 97.8% | 14.4 | 0.35 | Apache-2.0 | 27.2 M |
-| **YOLOX-Tiny** (ships) | 1.18% | 4.5 | -1.0 | 97.1% | 96.1% | 2.1 | 0.5 | Apache-2.0 | 5.0 M |
-| **YOLOX-M** (ships) | 1.11% | 5.6 | -2.0 | 97.1% | 95.0% | 7.5 | 0.45 | Apache-2.0 | 25.3 M |
-| YOLOv8-n | 1.43% | 7.2 | -0.7 | 95.7% | 95.0% | 1.5 | 0.35 | AGPL-3.0 | 3.1 M |
-| YOLOv8-m | 1.38% | 7.9 | -2.3 | 96.1% | 93.7% | 8.7 | 0.35 | AGPL-3.0 | 25.8 M |
-| OpenCFU | 8.57% | 22.5 | -9.3 | 84.9% | 76.5% | 0.6 | - | GPL-3.0 (tool) | - |
+| **RF-DETR-nano** (ships) | 1.45% | 1.2 | +0.6 | 97.7% | 98.6% | 17.4 | 0.35 | Apache-2.0 | 27.2 M |
+| **YOLOX-Tiny** (ships) | 1.59% | 1.9 | -0.9 | 98.4% | 97.1% | 2.6 | 0.5 | Apache-2.0 | 5.0 M |
+| **YOLOX-M** (ships) | 1.16% | 1.4 | -0.5 | 98.3% | 97.5% | 9.9 | 0.45 | Apache-2.0 | 25.3 M |
+| YOLOv8-n | 1.65% | 2.0 | -0.7 | 98.0% | 96.9% | 1.8 | 0.35 | AGPL-3.0 | 3.1 M |
+| YOLOv8-m | 1.61% | 2.3 | -1.1 | 98.3% | 96.7% | 11.0 | 0.35 | AGPL-3.0 | 25.8 M |
+| OpenCFU | 7.95% | 9.9 | +4.8 | 84.4% | 90.6% | 1.0 | - | GPL-3.0 (tool) | - |
 
 ## By source
 
@@ -48,37 +48,37 @@ Clinical plates vs smartphone photos.
 
 | model | mode | clinical MdAPE | clinical MAE | smartphone MdAPE | smartphone MAE |
 |---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | crop | 0.73% | 1.3 | 1.38% | 9.2 |
-| **YOLOX-Tiny** (ships) | crop | 0.85% | 1.5 | 1.39% | 11.4 |
-| **YOLOX-M** (ships) | crop | 0.85% | 1.5 | 2.06% | 12.0 |
-| YOLOv8-n | crop | 1.05% | 2.5 | 2.00% | 21.1 |
-| YOLOv8-m | crop | 1.00% | 2.5 | 1.45% | 19.8 |
-| OpenCFU | crop | 9.70% | 11.1 | 13.33% | 51.6 |
-| **RF-DETR-nano** (ships) | whole image | 1.17% | 1.9 | 1.42% | 8.7 |
-| **YOLOX-Tiny** (ships) | whole image | 1.15% | 1.9 | 1.39% | 11.1 |
-| **YOLOX-M** (ships) | whole image | 0.82% | 1.7 | 1.44% | 15.4 |
-| YOLOv8-n | whole image | 1.55% | 3.4 | 1.40% | 16.8 |
-| YOLOv8-m | whole image | 1.30% | 3.2 | 1.45% | 19.8 |
-| OpenCFU | whole image | 9.57% | 13.1 | 5.56% | 46.3 |
+| **RF-DETR-nano** (ships) | crop | 0.57% | 0.7 | 1.85% | 2.0 |
+| **YOLOX-Tiny** (ships) | crop | 0.46% | 0.7 | 4.42% | 5.1 |
+| **YOLOX-M** (ships) | crop | 0.58% | 0.7 | 1.44% | 2.0 |
+| YOLOv8-n | crop | 0.99% | 1.0 | 5.72% | 6.4 |
+| YOLOv8-m | crop | 0.99% | 1.0 | 5.13% | 5.8 |
+| OpenCFU | crop | 9.73% | 8.8 | 13.29% | 15.7 |
+| **RF-DETR-nano** (ships) | whole image | 1.16% | 0.9 | 1.81% | 2.2 |
+| **YOLOX-Tiny** (ships) | whole image | 0.80% | 0.7 | 4.42% | 5.1 |
+| **YOLOX-M** (ships) | whole image | 0.61% | 0.8 | 2.54% | 3.3 |
+| YOLOv8-n | whole image | 0.94% | 1.0 | 4.56% | 4.8 |
+| YOLOv8-m | whole image | 1.23% | 1.0 | 5.55% | 5.9 |
+| OpenCFU | whole image | 6.58% | 5.6 | 18.79% | 21.9 |
 
 ## By colony density
 
-True colony count per plate: <30 (46 plates), 30-300 (140 plates), >300 (12 plates). Plates under 30 colonies are TFTC (too few to count) and plates over 300 are TNTC (too numerous to count); lab practice counts only 30-300, which is why the headline MdAPE uses that range. Here MdAPE covers all plates in the bucket.
+True colony count per plate: <30 (78 plates), 30-300 (114 plates), >300 (0 plates). Plates under 30 colonies are TFTC (too few to count) and plates over 300 are TNTC (too numerous to count); lab practice counts only 30-300, which is why the headline MdAPE uses that range. Here MdAPE covers all plates in the bucket.
 
 | model | mode | <30 MAE | <30 MdAPE | 30-300 MAE | 30-300 MdAPE | >300 MAE | >300 MdAPE |
 |---|---|---|---|---|---|---|---|
-| **RF-DETR-nano** (ships) | crop | 1.5 | 2.17% | 2.6 | 0.75% | 22.4 | 2.30% |
-| **YOLOX-Tiny** (ships) | crop | 1.4 | 0.00% | 3.1 | 0.96% | 29.4 | 2.78% |
-| **YOLOX-M** (ships) | crop | 1.5 | 0.00% | 3.4 | 1.05% | 28.7 | 3.56% |
-| YOLOv8-n | crop | 3.2 | 6.11% | 5.4 | 1.38% | 52.0 | 4.05% |
-| YOLOv8-m | crop | 3.2 | 8.54% | 5.0 | 1.21% | 50.6 | 4.47% |
-| OpenCFU | crop | 9.3 | 31.67% | 16.4 | 9.76% | 145.0 | 19.07% |
-| **RF-DETR-nano** (ships) | whole image | 1.6 | 4.58% | 3.0 | 1.18% | 21.8 | 3.31% |
-| **YOLOX-Tiny** (ships) | whole image | 1.4 | 0.00% | 3.4 | 1.18% | 28.5 | 2.40% |
-| **YOLOX-M** (ships) | whole image | 1.5 | 2.08% | 4.0 | 1.11% | 39.6 | 3.91% |
-| YOLOv8-n | whole image | 3.8 | 5.83% | 5.2 | 1.43% | 42.9 | 4.36% |
-| YOLOv8-m | whole image | 3.8 | 7.33% | 5.6 | 1.38% | 50.3 | 4.39% |
-| OpenCFU | whole image | 10.3 | 31.88% | 16.9 | 8.57% | 134.5 | 19.38% |
+| **RF-DETR-nano** (ships) | crop | 0.5 | 0.00% | 1.4 | 1.06% | - | - |
+| **YOLOX-Tiny** (ships) | crop | 0.5 | 0.00% | 2.7 | 1.45% | - | - |
+| **YOLOX-M** (ships) | crop | 0.5 | 0.00% | 1.4 | 0.92% | - | - |
+| YOLOv8-n | crop | 0.8 | 0.00% | 3.4 | 2.11% | - | - |
+| YOLOv8-m | crop | 0.7 | 0.00% | 3.3 | 1.53% | - | - |
+| OpenCFU | crop | 7.0 | 30.07% | 13.1 | 10.12% | - | - |
+| **RF-DETR-nano** (ships) | whole image | 0.6 | 0.00% | 1.6 | 1.45% | - | - |
+| **YOLOX-Tiny** (ships) | whole image | 0.6 | 0.00% | 2.7 | 1.59% | - | - |
+| **YOLOX-M** (ships) | whole image | 0.6 | 0.00% | 2.0 | 1.16% | - | - |
+| YOLOv8-n | whole image | 0.8 | 0.00% | 2.8 | 1.65% | - | - |
+| YOLOv8-m | whole image | 0.8 | 0.00% | 3.4 | 1.61% | - | - |
+| OpenCFU | whole image | 4.1 | 21.06% | 13.8 | 7.95% | - | - |
 
 ## CPU speed
 
@@ -86,32 +86,32 @@ Median seconds per plate on CPU, one plate at a time (OpenCFU runs in a containe
 
 | model | crop | whole image |
 |---|---|---|
-| **RF-DETR-nano** (ships) | 8.7 | 14.4 |
-| **YOLOX-Tiny** (ships) | 1.3 | 2.1 |
-| **YOLOX-M** (ships) | 4.5 | 7.5 |
-| YOLOv8-n | 0.9 | 1.5 |
-| YOLOv8-m | 5.2 | 8.7 |
-| OpenCFU | 0.6 | 0.6 |
+| **RF-DETR-nano** (ships) | 9.0 | 17.4 |
+| **YOLOX-Tiny** (ships) | 1.6 | 2.6 |
+| **YOLOX-M** (ships) | 6.0 | 9.9 |
+| YOLOv8-n | 1.1 | 1.8 |
+| YOLOv8-m | 6.6 | 11.0 |
+| OpenCFU | 1.1 | 1.0 |
 
 ## How the threshold was chosen
 
-A detection counts when its score is at least the threshold. For each model the threshold was swept automatically on the validation split from 0.20 to 0.80 and the value with the lowest MdAPE (30-300) was kept, ties broken by the lowest MAE. MdAPE by threshold (the chosen one in bold):
+A detection counts when its score is at least the threshold. For each model the threshold was swept automatically on the validation split from 0.20 to 0.80 and the value with the lowest MdAPE (30-300) was kept, ties broken by the lowest MAE. Below, MdAPE on this test split by threshold, for information only: the bold value is the one fixed on validation, not the best one here.
 
 | threshold | RF-DETR-nano crop | RF-DETR-nano whole image | YOLOX-Tiny crop | YOLOX-Tiny whole image | YOLOX-M crop | YOLOX-M whole image |
 |---|---|---|---|---|---|---|
-| 0.2 | 1.40% | 1.83% | 1.48% | 1.87% | 1.40% | 1.48% |
-| 0.25 | 1.30% | 1.51% | 1.41% | 1.67% | 1.27% | 1.38% |
-| 0.3 | 1.16% | 1.26% | 1.33% | 1.44% | 1.21% | 1.27% |
-| 0.35 | 0.84% | **1.18%** | 1.14% | 1.39% | **1.05%** | 1.19% |
-| 0.4 | **0.75%** | 1.18% | 1.14% | 1.39% | 1.11% | 1.29% |
-| 0.45 | 1.01% | 1.18% | 1.14% | 1.38% | 1.05% | **1.11%** |
-| 0.5 | 1.18% | 1.28% | **0.96%** | **1.18%** | 1.17% | 1.26% |
-| 0.55 | 1.37% | 1.36% | 1.04% | 1.25% | 1.05% | 1.29% |
-| 0.6 | 1.44% | 1.46% | 1.18% | 1.33% | 1.18% | 1.35% |
-| 0.65 | 2.08% | 2.01% | 1.61% | 1.89% | 1.53% | 1.72% |
-| 0.7 | 2.94% | 2.83% | 2.27% | 2.19% | 1.83% | 2.15% |
-| 0.75 | 4.20% | 4.20% | 2.90% | 2.80% | 2.53% | 2.48% |
-| 0.8 | 6.13% | 5.56% | 4.20% | 4.04% | 3.51% | 4.06% |
+| 0.2 | 2.34% | 2.33% | 1.58% | 1.63% | 1.09% | 1.10% |
+| 0.25 | 2.03% | 1.93% | 1.45% | 1.47% | 0.91% | 0.94% |
+| 0.3 | 1.59% | 1.64% | 1.47% | 1.50% | 0.91% | 0.89% |
+| 0.35 | 1.10% | **1.45%** | 1.16% | 1.53% | **0.92%** | 0.98% |
+| 0.4 | **1.06%** | 1.34% | 1.45% | 1.65% | 0.99% | 1.12% |
+| 0.45 | 1.35% | 1.40% | 1.34% | 1.63% | 1.41% | **1.16%** |
+| 0.5 | 1.43% | 1.45% | **1.45%** | **1.59%** | 1.41% | 1.17% |
+| 0.55 | 2.08% | 2.15% | 1.39% | 1.59% | 1.53% | 1.45% |
+| 0.6 | 2.31% | 2.31% | 1.48% | 1.86% | 1.54% | 1.51% |
+| 0.65 | 2.92% | 2.78% | 2.00% | 1.80% | 1.45% | 1.45% |
+| 0.7 | 4.58% | 4.29% | 2.46% | 2.31% | 2.12% | 2.10% |
+| 0.75 | 7.20% | 6.56% | 2.73% | 2.69% | 3.15% | 3.03% |
+| 0.8 | 9.16% | 9.71% | 4.63% | 5.29% | 6.16% | 4.63% |
 
 ## How to read these metrics
 
@@ -121,6 +121,31 @@ A detection counts when its score is at least the threshold. For each model the 
 - **precision**: share of detections that are real colonies. **recall**: share of real colonies that were found.
 - **match radius**: a detection matches a true colony when its centre is within half the colony's mean box side of the true centre; each colony matches at most once.
 <!-- results:end -->
+
+## Test run (2026-11-16)
+
+The report above is the **test** split: 192 plates (142 clinical, 50 smartphone) that were never
+used for training or for any choice. It was run **once**, on 2026-11-15/16, for all methods in both
+modes, with every setting frozen on val beforehand (see "Settings" below): `bench/evaluate.py
+--split test --threshold <frozen>` for the models and `bench/opencfu_runner.py --split test
+--setting <val-tuned>` for OpenCFU (both refuse the test split without them). The val outputs are in
+`benchmark/val/` and stay as they are.
+
+- **Release gate** (MdAPE 30-300 at most 5% on test, crop mode): RF-DETR-nano 1.06%, YOLOX-Tiny
+  1.45%, YOLOX-M 0.92%; all three pass.
+- **Default model:** `rfdetr-nano` stays the default (decided on val before the test run). YOLOX-M is
+  slightly ahead on test (0.92% vs 1.06% MdAPE, 1.04 vs 1.06 MAE), a difference within the noise of
+  114 in-range plates; choosing the default from test numbers would reuse the test split for a
+  decision.
+- **YOLOX-Tiny on smartphone photos** is the weak spot: MdAPE 4.42%, undercounting by 4.5 colonies
+  per plate (clinical 0.46%); RF-DETR-nano (1.85%) and YOLOX-M (1.44%) handle them much better.
+- **MAE is not comparable between val and test:** the test split has no plate above 300 colonies
+  (val: 12) and more near-empty plates (78 below 30, val: 46), so its MAE is lower. Compare MdAPE
+  30-300 instead (val vs test, crop: RF-DETR-nano 0.75% / 1.06%, YOLOX-Tiny 0.96% / 1.45%, YOLOX-M
+  1.05% / 0.92%, YOLOv8-n 1.38% / 2.11%, YOLOv8-m 1.21% / 1.53%, OpenCFU 9.76% / 10.12%).
+- **CPU times on test are 20-40% higher than on val** for every method, likely from a warmer
+  laptop overnight; the ratios between methods hold. Quote speed from the val run, where all
+  methods ran back to back under the same conditions.
 
 ## Settings (frozen 2026-11-15)
 
