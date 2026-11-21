@@ -2,7 +2,7 @@
 
 Open-source, offline bacterial colony counter for agar plate photos: Python package, CLI and napari plugin, with a published benchmark against human counts.
 
-Status: pre-alpha.
+Status: v0.1 released: three built-in models, CLI and plate finder; the API may still change before 1.0.
 
 Datasets, licenses and attribution: see [DATA.md](DATA.md).
 
@@ -25,13 +25,13 @@ All per-method tables: [results/benchmark/val/comparison.md](results/benchmark/v
 
 ## Quickstart
 
-> The v0.1 weights (`rfdetr-nano` (default), `yolox-tiny` (fastest) and `yolox-m`) are on Hugging Face, [`rafai-azz/colonycount-public`](https://huggingface.co/rafai-azz/colonycount-public) (tag `v0.1.0`; the repo is public from the v0.1 release), and the package is not on PyPI yet.
-> Until then, install from source. To use your own ONNX detector, point colonycount at it with `COLONYCOUNT_MODEL_PATH` (or `model_path=` / `--model-path`).
+> Weights for the three built-in models (`rfdetr-nano` (default), `yolox-tiny` (fastest) and `yolox-m`) download on first use from [`rafai-azz/colonycount-public`](https://huggingface.co/rafai-azz/colonycount-public) on Hugging Face.
+> To use your own ONNX detector, point colonycount at it with `COLONYCOUNT_MODEL_PATH` (or `model_path=` / `--model-path`).
 > The model's input/output contract is documented in `src/colonycount/detection/runner.py`.
 
 Requires Python 3.14. On an older Python, get 3.14 with `uv python install 3.14` (no admin rights needed).
 
-Install (once released):
+Install:
 
 ```sh
 pip install colonycount
