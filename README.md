@@ -21,6 +21,10 @@ On the test split, plate crop on (the default). MdAPE is the median error of the
 Held-out test split (unseen plates), run once with every setting fixed on the validation split. Full report: [results/README.md](results/README.md).
 <!-- results:end -->
 
+![colonycount vs OpenCFU on a held-out test plate](docs/images/colonycount-vs-opencfu.jpg)
+
+*A typical held-out test plate (127 colonies, chosen because both methods' errors are at their median on the test split, not a best case): colonycount (`rfdetr-nano`) counts 128 with 127 correct, 1 false and 0 missed; OpenCFU counts 114 with 102 correct, 12 false and 25 missed. Green = matches a hand-marked colony, red = false detection, orange dashed = missed colony. Photo: Du et al. (2026), Clinical Dataset of 19 Bacterial Colony Images, Zenodo 10.5281/zenodo.18256864, CC BY 4.0.*
+
 All per-method tables: [results/benchmark/val/comparison.md](results/benchmark/val/comparison.md).
 
 ## Quickstart
