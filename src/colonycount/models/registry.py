@@ -25,10 +25,7 @@ class Model:
 
 
 # Adding a model (e.g. `agar`, task 6.4) is one more entry here.
-# ponytail: `rfdetr-nano` is a placeholder until task 5.2 publishes the weights and pins the sha.
-# yolox-tiny (0.50) and yolox-m (0.45) are added with their entries at release task 1.2.
-# Thresholds are provisional (val sweep, results/benchmark/val/) until the plate-finder retune
-# (model-benchmark task 3.1) is re-scored; they are frozen before the one-time test run.
+# Thresholds frozen on val 2026-11-15, see results/README.md.
 MODELS = {
     m.name: m
     for m in [
@@ -36,9 +33,25 @@ MODELS = {
             name="rfdetr-nano",
             version="0.1.0",
             license="CC-BY-4.0",
-            url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/public.onnx",
-            sha256=None,
+            url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/rfdetr-nano.onnx",
+            sha256="42e7602cbcbb4b18d1851464b660a42d744d0b86edf11c02eb62046141081586",
             threshold=0.40,
+        ),
+        Model(
+            name="yolox-tiny",
+            version="0.1.0",
+            license="CC-BY-4.0",
+            url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/yolox-tiny.onnx",
+            sha256="cbc98f010e242726c781b0a4c6d6ea5a6d6c2b81ed7f28b2b30603ccacf8900e",
+            threshold=0.50,
+        ),
+        Model(
+            name="yolox-m",
+            version="0.1.0",
+            license="CC-BY-4.0",
+            url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/yolox-m.onnx",
+            sha256="392a148324c462b36777d353ded9be3db17a67f9adbecab376099183ff4500f6",
+            threshold=0.35,
         ),
     ]
 }

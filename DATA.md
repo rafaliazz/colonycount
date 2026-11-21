@@ -52,6 +52,8 @@ Mirror used for download: Hugging Face dataset [`leodriesch/agar`](https://huggi
 | Model | Trained on | Weights license | Status |
 |---|---|---|---|
 | `rfdetr-nano` (default) | smartphone + clinical | CC BY 4.0 (attribution above) | v0.1 |
+| `yolox-tiny` | smartphone + clinical | CC BY 4.0 (attribution above) | v0.1 |
+| `yolox-m` | smartphone + clinical | CC BY 4.0 (attribution above) | v0.1 |
 | `agar` | AGAR | CC BY-NC 2.0, non-commercial only | later |
 
 The code is Apache-2.0. Datasets and model weights are not covered by the code license; each carries the license listed above.
