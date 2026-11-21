@@ -22,6 +22,9 @@ class Model:
     url: str
     sha256: str | None  # None = not published yet
     threshold: float  # default score threshold, chosen on val
+    size_mb: float | None = None  # download size
+    params_m: float | None = None  # parameters, millions
+    cpu_s: float | None = None  # median CPU s/plate, val, plate crop (results/README.md)
 
 
 # Adding a model (e.g. `agar`, task 6.4) is one more entry here.
@@ -36,6 +39,9 @@ MODELS = {
             url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/rfdetr-nano.onnx",
             sha256="42e7602cbcbb4b18d1851464b660a42d744d0b86edf11c02eb62046141081586",
             threshold=0.40,
+            size_mb=109.2,
+            params_m=27.2,
+            cpu_s=8.7,
         ),
         Model(
             name="yolox-tiny",
@@ -44,6 +50,9 @@ MODELS = {
             url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/yolox-tiny.onnx",
             sha256="cbc98f010e242726c781b0a4c6d6ea5a6d6c2b81ed7f28b2b30603ccacf8900e",
             threshold=0.50,
+            size_mb=20.3,
+            params_m=5.0,
+            cpu_s=1.3,
         ),
         Model(
             name="yolox-m",
@@ -52,6 +61,9 @@ MODELS = {
             url="https://huggingface.co/rafai-azz/colonycount-public/resolve/v0.1.0/yolox-m.onnx",
             sha256="392a148324c462b36777d353ded9be3db17a67f9adbecab376099183ff4500f6",
             threshold=0.35,
+            size_mb=101.2,
+            params_m=25.3,
+            cpu_s=4.5,
         ),
     ]
 }
