@@ -79,12 +79,18 @@ def test_choose_model(published):
 
 
 def test_unknown_model(local_model):
-    with pytest.raises(ValueError, match="'nope'.*available models: rfdetr-nano"):
+    with pytest.raises(
+        ValueError, match="'nope'.*available models: rfdetr-nano, yolox-m, yolox-tiny"
+    ):
         colonycount.count(make_plate()[0], model="nope")
 
 
 def test_unpublished_model_points_to_local_override(monkeypatch):
     monkeypatch.delenv("COLONYCOUNT_MODEL_PATH", raising=False)
+    m = registry.MODELS["rfdetr-nano"]
+    monkeypatch.setitem(
+        registry.MODELS, "rfdetr-nano", registry.Model(**{**vars(m), "sha256": None})
+    )
     with pytest.raises(RuntimeError, match="not published yet.*COLONYCOUNT_MODEL_PATH"):
         registry.resolve("rfdetr-nano")
 
@@ -102,3 +108,10 @@ def test_threshold_precedence(published, monkeypatch):
     assert registry.threshold("agar", "x.onnx") == 0.5  # local ONNX file: global default
     monkeypatch.setenv("COLONYCOUNT_THRESHOLD", "0.8")
     assert registry.threshold("agar") == 0.8  # env var beats the registry
+
+
+def test_v01_models_are_pinned():
+    assert sorted(registry.MODELS) == ["rfdetr-nano", "yolox-m", "yolox-tiny"]
+    for m in registry.MODELS.values():
+        assert m.url.endswith(f"/resolve/v{m.version}/{m.name}.onnx")
+        assert len(m.sha256) == 64
