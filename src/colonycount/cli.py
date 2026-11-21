@@ -60,8 +60,12 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.list_models:
+        default = env_str("COLONYCOUNT_MODEL", "rfdetr-nano")
+        print("name\tversion\tsize MB\tparams M\tCPU s/plate\tthreshold\tlicense")
         for m in registry.MODELS.values():
-            print(f"{m.name}\t{m.version}\t{m.license}")
+            cols = [m.version, m.size_mb, m.params_m, m.cpu_s, m.threshold, m.license]
+            name = f"{m.name} (default)" if m.name == default else m.name
+            print("\t".join([name, *("-" if v is None else str(v) for v in cols)]))
         return 0
     if not args.images:
         p.error("no images given")

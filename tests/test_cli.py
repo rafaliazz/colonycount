@@ -74,7 +74,10 @@ def test_range_and_threshold_options(plates, tmp_path):
 
 def test_list_models(capsys):
     assert main(["--list-models"]) == 0
-    assert "rfdetr-nano\t0.1.0\tCC-BY-4.0" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert out.startswith("name\tversion\tsize MB\tparams M\tCPU s/plate\tthreshold\tlicense")
+    assert "rfdetr-nano (default)\t0.1.0\t109.2\t27.2\t8.7\t0.4\tCC-BY-4.0" in out
+    assert "yolox-tiny\t0.1.0\t20.3\t5.0\t1.3\t0.5\tCC-BY-4.0" in out
 
 
 @pytest.mark.parametrize(
