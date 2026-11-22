@@ -1,6 +1,7 @@
 """OpenCFU baseline (model-benchmark task 2.1), scored with bench/evaluate.py's metrics.
 
 Usage: uv run python bench/opencfu_runner.py [--split val] [--no-plate] [--tune | --setting JSON]
+       [--dataset-dir DIR]
        [--out DIR]
 Needs Docker and the image: ``docker build -t colonycount-opencfu bench/opencfu``.
 
@@ -30,7 +31,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from dotenv import load_dotenv
-from evaluate import ground_truth, markdown, report, summarize
+from evaluate import ground_truth, layout, markdown, report, summarize
 
 from colonycount._env import env_path
 from colonycount.detection.pipeline import load_image
@@ -77,11 +78,18 @@ def to_plate(dets: np.ndarray, prep: dict) -> dict:
     return {"xy": [tuple(p) for p in xy], "diameter": d.tolist(), "conf": [1.0] * len(xy)}
 
 
-def prepare(data_dir: Path, split: str, no_plate: bool, sides: list[int], tmp: Path) -> list[dict]:
+def prepare(
+    data_dir: Path,
+    split: str,
+    no_plate: bool,
+    sides: list[int],
+    tmp: Path,
+    dataset_dir: Path | None = None,
+) -> list[dict]:
     """Crop + resize every plate once per side; returns GT and geometry per plate."""
     plates = []
-    for k, (im, boxes) in enumerate(ground_truth(data_dir, split)):
-        img = load_image(data_dir / im["file_name"])
+    for k, (im, boxes) in enumerate(ground_truth(data_dir, split, dataset_dir)):
+        img = load_image(layout(data_dir, dataset_dir)[1] / im["file_name"])
         h, w = img.shape[:2]
         circle = None if no_plate else find_plate(img)
         x0, y0, x1, y1 = 0, 0, w, h
@@ -159,6 +167,7 @@ def main() -> None:
     ap.add_argument("--setting", type=json.loads, help="JSON, keys as DEFAULT (required on test)")
     ap.add_argument("--jobs", type=int, default=6, help="parallel OpenCFU processes when tuning")
     ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
+    ap.add_argument("--dataset-dir", type=Path, help="DIR/annotations/<split>.json, images in DIR")
     ap.add_argument("--out", type=Path, help="default: <data dir>/bench")
     args = ap.parse_args()
     if args.split == "test" and not args.allow_test:
@@ -176,7 +185,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         sides = GRID["side"] if args.tune else [args.setting["side"]]
-        plates = prepare(args.data_dir, args.split, args.no_plate, sides, tmp)
+        plates = prepare(args.data_dir, args.split, args.no_plate, sides, tmp, args.dataset_dir)
         grid, best = [], args.setting
         if args.tune:
             for values in itertools.product(*GRID.values()):

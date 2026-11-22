@@ -1,7 +1,7 @@
 """Count-accuracy benchmark: colonycount's real pipeline on whole plates of a COCO split (task 2.3).
 
 Usage: uv run python bench/evaluate.py --model FILE.onnx [--split val] [--no-plate] [--out DIR]
-       [--limit N]
+       [--limit N] [--dataset-dir DIR]
 
 Runs ``colonycount.count`` (plate finding, tiling, seam-aware NMS, threshold) once per plate at the
 lowest swept threshold; higher thresholds keep the detections scoring at or above them. That is
@@ -187,9 +187,16 @@ def markdown(rep: dict, seconds: list[float]) -> str:
     return "\n".join(out) + "\n"
 
 
-def ground_truth(data_dir: Path, split: str):
+def layout(data_dir: Path, dataset_dir: Path | None) -> tuple[Path, Path]:
+    """(annotations dir, image root): the public layout, or DIR/annotations and DIR."""
+    if dataset_dir:
+        return dataset_dir / "annotations", dataset_dir
+    return data_dir / "public" / "annotations", data_dir
+
+
+def ground_truth(data_dir: Path, split: str, dataset_dir: Path | None = None):
     """Yield (COCO image record, its GT boxes as an Nx4 xywh array), sorted by file name."""
-    coco = json.loads((data_dir / "public" / "annotations" / f"{split}.json").read_text())
+    coco = json.loads((layout(data_dir, dataset_dir)[0] / f"{split}.json").read_text())
     anns: dict[int, list] = {i["id"]: [] for i in coco["images"]}
     for a in coco["annotations"]:
         anns[a["image_id"]].append(a["bbox"])
@@ -198,14 +205,19 @@ def ground_truth(data_dir: Path, split: str):
 
 
 def run(
-    model: Path, split: str, data_dir: Path, no_plate: bool, limit: int | None = None
+    model: Path,
+    split: str,
+    data_dir: Path,
+    no_plate: bool,
+    limit: int | None = None,
+    dataset_dir: Path | None = None,
 ) -> tuple[list[dict], list[float]]:
     plates, seconds = [], []
-    items = list(ground_truth(data_dir, split))
+    items = list(ground_truth(data_dir, split, dataset_dir))
     if limit:  # smoke runs: evenly spaced plates
         items = items[:: max(1, len(items) // limit)][:limit]
     for im, boxes in items:
-        img = load_image(data_dir / im["file_name"])
+        img = load_image(layout(data_dir, dataset_dir)[1] / im["file_name"])
         gt_xy = boxes[:, :2] + boxes[:, 2:] / 2
         found = find_plate(img)
         circle = None if no_plate else found
@@ -284,6 +296,7 @@ def main() -> None:
     ap.add_argument("--no-plate", action="store_true", help="count the whole image, no plate crop")
     ap.add_argument("--threshold", type=float, help="report at this fixed threshold, no sweep")
     ap.add_argument("--data-dir", type=Path, help="default: COLONYCOUNT_DATA_DIR")
+    ap.add_argument("--dataset-dir", type=Path, help="DIR/annotations/<split>.json, images in DIR")
     ap.add_argument("--out", type=Path, help="default: <data dir>/bench")
     ap.add_argument("--save-detections", action="store_true", help="also write <stem>.npz")
     ap.add_argument("--limit", type=int, help="only N evenly spaced plates (smoke runs)")
@@ -295,7 +308,9 @@ def main() -> None:
     args.data_dir = args.data_dir or env_path("COLONYCOUNT_DATA_DIR", "~/data/colonycount")
     args.out = args.out or args.data_dir / "bench"
 
-    plates, seconds = run(args.model, args.split, args.data_dir, args.no_plate, args.limit)
+    plates, seconds = run(
+        args.model, args.split, args.data_dir, args.no_plate, args.limit, args.dataset_dir
+    )
     rep = report(plates, args.split, args.no_plate, args.model.name, fixed=args.threshold)
     args.out.mkdir(parents=True, exist_ok=True)
     stem = args.out / (args.split + ("-noplate" if args.no_plate else ""))
