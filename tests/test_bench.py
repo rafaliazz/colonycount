@@ -80,3 +80,11 @@ def test_report_at_a_fixed_threshold_instead_of_the_sweep():
     assert (swept["threshold_source"], fixed["threshold_source"]) == ("val-sweep", "fixed")
     assert fixed["threshold"] == 0.42 and fixed["by_source"]["overall"]["bias"] == -10
     assert fixed["threshold_curve"].keys() == swept["threshold_curve"].keys() | {"0.42"}
+
+
+def test_layout_default_is_public_and_dataset_dir_overrides(tmp_path):
+    assert evaluate.layout(tmp_path, None) == (tmp_path / "public" / "annotations", tmp_path)
+    assert evaluate.layout(tmp_path, tmp_path / "agar") == (
+        tmp_path / "agar" / "annotations",
+        tmp_path / "agar",
+    )
