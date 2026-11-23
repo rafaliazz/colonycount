@@ -108,3 +108,22 @@ def test_find_plate_red_disc_padded():
     cv2.circle(img, (260, 250), 190, (255, 30, 30), -1)  # red-lit plate: weak luma edge
     cx, cy, r = find_plate(img)
     assert abs(cx - 260) < 5 and abs(cy - 250) < 5 and abs(r - 190 * 1.05) < 8
+
+
+def test_upscale_maps_boxes_back(monkeypatch):
+    from colonycount.detection import pipeline
+
+    seen = []
+
+    def stub(session, crop, tile, overlap):
+        seen.append(crop.shape[:2])
+        return np.array([[20.0, 20.0, 40.0, 40.0]]), np.array([0.9])
+
+    monkeypatch.setattr(pipeline, "detect_tiled", stub)
+    monkeypatch.setattr(pipeline, "find_plate", lambda img: None)
+    monkeypatch.setattr(pipeline, "load_session", lambda path: None)
+    monkeypatch.setattr(pipeline, "tile_size", lambda session: 640)
+    monkeypatch.setenv("COLONYCOUNT_UPSCALE", "2")
+    r = colonycount.count(np.zeros((100, 120, 3), np.uint8), model_path=__file__)
+    assert seen == [(200, 240)]
+    assert (r.detections[0].x, r.detections[0].y, r.detections[0].diameter) == (15.0, 15.0, 10.0)

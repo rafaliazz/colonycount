@@ -14,7 +14,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from colonycount._env import env_int, env_str
+from colonycount._env import env_float, env_int, env_str
 from colonycount.detection.plate import find_plate
 from colonycount.detection.runner import load_session, tile_size
 from colonycount.detection.tiling import detect_tiled, nms
@@ -75,7 +75,13 @@ def count(
         x1, y1 = min(w, math.ceil(cx + r) + 1), min(h, math.ceil(cy + r) + 1)
     else:
         x0, y0, x1, y1 = 0, 0, w, h
-    boxes, scores = detect_tiled(session, img[y0:y1, x0:x1], tile, overlap)
+    crop = img[y0:y1, x0:x1]
+    upscale = env_float("COLONYCOUNT_UPSCALE", 1.0, lo=1e-6)
+    if upscale != 1.0:  # test-time upscaling: small colonies look bigger to the model
+        crop = cv2.resize(crop, None, fx=upscale, fy=upscale, interpolation=cv2.INTER_LINEAR)
+    boxes, scores = detect_tiled(session, crop, tile, overlap)
+    if upscale != 1.0:
+        boxes /= upscale
     boxes += [x0, y0, x0, y0]
 
     keep = scores >= threshold
