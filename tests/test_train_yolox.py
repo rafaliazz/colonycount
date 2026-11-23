@@ -85,9 +85,12 @@ def test_mosaic_epochs_follow_no_aug_epochs():
     assert train_yolox.mosaic_epochs(12) == train_yolox.mosaic_epochs(15) == 0
     with pytest.raises(ValueError, match="mosaic"):
         train_yolox.mosaic_epochs(20)
-    c = dict(epochs=12, imgsz=640, seed=0, patience=5, nbs=16, batch=2, accumulate=8)
+    c = dict(
+        epochs=12, imgsz=640, seed=0, patience=5, nbs=16, batch=2, accumulate=8, tiles="d/tiles_640"
+    )
     r = train_yolox.comparable(c, amp=False)["recipe"]
     assert (r["mosaic_epochs"], r["no_aug_epochs"], r["hsv_gains"]) == (0, 15, [5, 30, 30])
+    assert train_yolox.comparable(c, amp=False)["tiles"] == "tiles_640"
 
 
 def test_config_effective_batch_and_resume_args(tmp_path, monkeypatch):
@@ -118,7 +121,16 @@ def test_config_effective_batch_and_resume_args(tmp_path, monkeypatch):
 
 
 def test_comparable_warns_without_accumulation(capsys):
-    c = dict(epochs=12, imgsz=640, seed=0, patience=5, nbs=16, batch=32, accumulate=1)
+    c = dict(
+        epochs=12,
+        imgsz=640,
+        seed=0,
+        patience=5,
+        nbs=16,
+        batch=32,
+        accumulate=1,
+        tiles="d/tiles_640",
+    )
     assert train_yolox.comparable(c, amp=True)["optimizer"] == "SGD"
     assert "WARNING" in capsys.readouterr().out
 
