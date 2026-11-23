@@ -39,3 +39,24 @@ def test_make_split_tile_grid_metadata_and_empty_tiles(tmp_path):
 
     stats = mt.make_split(coco, tmp_path, tmp_path / "t2", 0.0, random.Random(0))
     assert stats == {"tiles": 2, "empty": 0, "boxes": 2}
+
+
+def test_scaled_plates_keep_boxes_on_the_scaled_image_and_photo_darkens(tmp_path):
+    img = np.full((400, 400, 3), 200, np.uint8)
+    img[100:140, 100:140] = 50  # a colony, box [100, 100, 40, 40]
+    cv2.imwrite(str(tmp_path / "a.png"), img)
+    coco = {
+        "images": [{"id": 1, "file_name": "a.png", "source": "smartphone", "group": "sp01"}],
+        "annotations": [{"id": 1, "image_id": 1, "bbox": [100, 100, 40, 40]}],
+        "categories": [{"id": 1, "name": "colony"}],
+    }
+    scaled, plates = mt.scaled_plates(coco, tmp_path, [0.5])
+    stats = mt.make_split(scaled, tmp_path, tmp_path / "s", 0.0, random.Random(0), plates)
+    assert stats["boxes"] == 1
+    tiled = json.loads((tmp_path / "s" / "_annotations.coco.json").read_text())
+    assert tiled["images"][0]["file_name"] == "a_s50_0_0.jpg"
+    x, y, w, h = tiled["annotations"][0]["bbox"]
+    tile = cv2.imread(str(tmp_path / "s" / "a_s50_0_0.jpg"))
+    assert (x, y, w, h) == (50, 50, 20, 20) and tile.shape[:2] == (200, 200)
+    assert tile[int(y + h / 2), int(x + w / 2)].mean() < 100 < tile[0, 0].mean()  # colony in place
+    assert mt.photometric(img, random.Random(0)).mean() < img.mean()

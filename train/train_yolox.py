@@ -6,10 +6,10 @@ Usage: uv sync --extra train --group dev --group yolox, then
 
 The YOLOX model code is vendored in train/third_party/yolox (pinned commit, see its NOTICE); the
 PyPI and git packages don't install on Python 3.14. YOLOX reads COCO, so the make_tiles.py tiles
-in <data-dir>/public/tiles_<T>/{train,valid} are used as they are, at their native size T (edge
-tiles zero-padded bottom/right, as colonycount does at inference), single class. Starts from the
-COCO weights (downloaded once to <data-dir>/weights/, SHA-256 checked); the 80-class classifier is
-replaced by a 1-class one.
+in <data-dir>/public/tiles_<T>/{train,valid} (or the folder --tiles NAME) are used as they are, at
+their native size T (edge tiles zero-padded bottom/right, as colonycount does at inference),
+single class. Starts from the COCO weights (downloaded once to <data-dir>/weights/, SHA-256
+checked); the 80-class classifier is replaced by a 1-class one.
 
 Same budget as RF-DETR and YOLOv8: COLONYCOUNT_TRAIN_EPOCHS, seed COLONYCOUNT_SEED, early stopping
 after 5 epochs without a better val mAP@0.5:0.95, effective batch nbs = COLONYCOUNT_TRAIN_BATCH_SIZE
@@ -131,6 +131,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument(
         "--batch", type=int, help="tiles per step; default: COLONYCOUNT_TRAIN_BATCH_SIZE"
     )
+    ap.add_argument("--tiles", help="tile folder under <data-dir>/public/; default tiles_<T>")
     ap.add_argument("--fraction", type=float, default=1.0, help="share of train tiles to use")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--device", default="cuda", help="cuda or cpu (falls back to cpu)")
@@ -158,7 +159,7 @@ def build_config(args: argparse.Namespace) -> dict:
     )
     return dict(
         size=args.size,
-        tiles=str(args.data_dir / "public" / f"tiles_{tile}"),
+        tiles=str(args.data_dir / "public" / (args.tiles or f"tiles_{tile}")),
         out=str(args.data_dir / "runs" / f"yolox_{args.size}" / time.strftime("%Y%m%d-%H%M%S")),
         epochs=args.epochs,
         imgsz=tile,
@@ -176,6 +177,7 @@ def comparable(config: dict, amp: bool) -> dict:
     """The settings that must match RF-DETR's and YOLOv8's runs."""
     keys = ("epochs", "imgsz", "seed", "patience", "nbs", "batch", "accumulate")
     c = {k: config[k] for k in keys} | {"optimizer": "SGD", "amp": amp, "ema": EMA_DECAY}
+    c["tiles"] = Path(config["tiles"]).name  # make_tiles.py names its robustness recipes
     c["recipe"] = dict(
         flip_prob=FLIP_PROB,
         hsv_prob=HSV_PROB,
