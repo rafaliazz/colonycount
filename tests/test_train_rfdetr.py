@@ -10,6 +10,15 @@ def test_new_run_gets_fresh_dir_and_no_resume(tmp_path):
     assert config["output_dir"].startswith(str(tmp_path / "runs" / "rfdetr_nano"))
 
 
+def test_tiles_picks_the_dataset_folder(tmp_path):
+    for extra, name in (
+        ([], "tiles_640"),
+        (["--tiles", "tiles_640_scalephoto"], "tiles_640_scalephoto"),
+    ):
+        args = train_rfdetr.parse_args(["--data-dir", str(tmp_path), *extra])
+        assert train_rfdetr.build_config(args)["dataset_dir"] == str(tmp_path / "public" / name)
+
+
 def test_resume_continues_in_the_checkpoint_dir(tmp_path):
     run = tmp_path / "runs" / "rfdetr_nano" / "20261113-010203"
     run.mkdir(parents=True)

@@ -1,11 +1,13 @@
 """Train RF-DETR-nano on the tiles from make_tiles.py (task 2.1), sized for a 4 GB GPU.
 
-Usage: uv run --no-sync python train/train_rfdetr.py [--data-dir DIR] [--epochs N]
+Usage: uv run --no-sync python train/train_rfdetr.py [--data-dir DIR] [--epochs N] [--tiles NAME]
        uv run --no-sync python train/train_rfdetr.py --resume <run dir>/last.ckpt [--epochs N]
 
 Writes <data-dir>/runs/rfdetr_nano/<timestamp>/: rfdetr's metrics.csv (val/mAP_50 and
 val/mAP_50_95 per epoch), checkpoint_best_total.pth (best val mAP@0.5:0.95, EMA or regular),
-last.ckpt (saved after every epoch), and summary.json (config, wall time, peak VRAM).
+last.ckpt (saved after every epoch), and summary.json (config incl. the tile folder, wall time,
+peak VRAM). --tiles NAME trains on <data-dir>/public/NAME instead of tiles_<T> (a make_tiles.py
+robustness recipe).
 
 --resume continues a stopped run from its last.ckpt in the same run directory, restoring the
 epoch, optimizer and LR schedule; --epochs is the total for the whole run, not extra epochs.
@@ -30,6 +32,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--epochs", type=int, help="default: COLONYCOUNT_TRAIN_EPOCHS")
     ap.add_argument("--batch-size", type=int, help="default: COLONYCOUNT_TRAIN_BATCH_SIZE")
     ap.add_argument("--grad-accum", type=int, help="default: COLONYCOUNT_TRAIN_GRAD_ACCUM")
+    ap.add_argument("--tiles", help="tile folder under <data-dir>/public/; default tiles_<T>")
     ap.add_argument("--resume", type=Path, help="last.ckpt of a stopped run to continue")
     args = ap.parse_args(argv)
     try:
@@ -54,7 +57,7 @@ def build_config(args: argparse.Namespace) -> dict:
         out = args.data_dir / "runs" / "rfdetr_nano" / time.strftime("%Y%m%d-%H%M%S")
     tile = env_int("COLONYCOUNT_TRAIN_TILE_SIZE", 640, lo=1)
     config = dict(
-        dataset_dir=str(args.data_dir / "public" / f"tiles_{tile}"),
+        dataset_dir=str(args.data_dir / "public" / (args.tiles or f"tiles_{tile}")),
         output_dir=str(out),
         epochs=args.epochs,
         batch_size=args.batch_size,
